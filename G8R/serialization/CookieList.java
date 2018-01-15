@@ -87,13 +87,39 @@ public class CookieList {
     /**
      * Adds the name/value pair. If the name already exists, the new value
      * replaces the old value
-     * @param name name to be added
+     * @param nam name to be added
      * @param val value to be associated with the name
      * @throws ValidationException if validation failure for name or value
      * @throws NullPointerException if name or value is null
      */
-    public void add(String name, String val) throws ValidationException {
+    public void add(String nam, String val) throws ValidationException {
 
+    }
+
+    /**
+     * Adds the cookie object to the list. If the name already existsm the new
+     * values replaces the old
+     * @param coo the cookie to add to the list
+     */
+    public void add(Cookie coo) {
+
+    }
+
+    /**
+     * Gives the current size of the cookie list
+     * @return the size of the list
+     */
+    public int size() {
+        return cookieList.size();
+    }
+
+    public boolean contains(String check4) {
+        for(Cookie cook : cookieList) {
+            if(cook.getName().equals(check4)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
