@@ -113,6 +113,11 @@ public class CookieList {
         return cookieList.size();
     }
 
+    /**
+     * Checks if a name is in the list
+     * @param check4 name to check 4
+     * @return if teh name is in the list
+     */
     public boolean contains(String check4) {
         for(Cookie cook : cookieList) {
             if(cook.getName().equals(check4)) {

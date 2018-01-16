@@ -27,7 +27,8 @@ import java.util.*;
  */
 class CookieListTest {
 
-    private List<String> expNames = new ArrayList<>(Arrays.asList("Bob", "Ted"));
+    private List<String> expNames =
+            new ArrayList<>(Arrays.asList("Bob", "Ted"));
     private List<String> expValues = new ArrayList<>(Arrays.asList("1", "2"));
     private byte[] expBytes = {0x00};
 
@@ -46,8 +47,7 @@ class CookieListTest {
 
     @Test
     void testGetValue() {
-        List<String> names = new ArrayList<>();
-        names.addAll(testCookie.getNames());
+        List<String> names = new ArrayList<>(testCookie.getNames());
 
         int i = 0;
         for(String n : names) {
@@ -74,14 +74,47 @@ class CookieListTest {
 
     @Test
     void testHashCode() {
+    CookieList eqlCookie = testCookie;
+        assertAll(("properties"),
+            ()-> {
+                assertEquals(testCookie.hashCode(), testCookie.hashCode());
+                assertEquals(testCookie.hashCode(), eqlCookie.hashCode());
+        });
     }
 
     @Test
     void testEquals() {
+        CookieList eqlCookie = testCookie;
+        CookieList eql2Cookie = eqlCookie;
+
+        assertAll("porperties",
+            () -> {
+                if(testCookie != null) {
+                    assertTrue(testCookie.equals(testCookie));
+
+                    assertEquals(testCookie.equals
+                            (eqlCookie), eqlCookie.equals(testCookie));
+
+                    assertAll("transitive",
+                        () -> {
+                        assertTrue(testCookie.equals(eqlCookie));
+                        assertTrue(eqlCookie.equals(eql2Cookie));
+                        assertTrue(testCookie.equals(eql2Cookie));
+                    });
+
+                    for(int i = 0; i < 10000; i++) {
+                            assertTrue(testCookie.equals(eqlCookie));
+                    }
+
+                    assertFalse(testCookie.equals(null));
+                }
+            });
     }
 
     @Test
     void testToString() {
+        String shldBMessage = "?";
+        assertEquals(shldBMessage, testCookie.toString());
     }
 
 }
