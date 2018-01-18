@@ -45,6 +45,6 @@ public class Cookie {
 
     @Override
     public String toString(){
-        return "";
+        return getName() + "=" + getValue();
     }
 }

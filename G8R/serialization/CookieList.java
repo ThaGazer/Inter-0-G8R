@@ -30,7 +30,8 @@ public class CookieList {
      * @param cl list of cookies to clone
      */
     public CookieList(CookieList cl) {
-
+        cookieList = new ArrayList<>();
+        cookieList.addAll(cl.cookieList);
     }
 
     /**
@@ -61,7 +62,12 @@ public class CookieList {
      * @return Set (potentially empty) of names (strings) for this list
      */
     public Set<String> getNames() {
-        return new HashSet<>();
+        Set<String> names = new HashSet<>();
+
+        for(Cookie c : cookieList) {
+            names.add(c.getName());
+        }
+        return names;
     }
 
     /**
@@ -70,7 +76,14 @@ public class CookieList {
      * @return value associated with the given name or null if no such name
      */
     public String getValue(String name) {
-        return "";
+        if(name != null && !name.equals("")) {
+            for (Cookie c : cookieList) {
+                if (c.getName().equals(name)) {
+                    return c.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -93,7 +106,8 @@ public class CookieList {
      * @throws NullPointerException if name or value is null
      */
     public void add(String nam, String val) throws ValidationException {
-
+        Cookie newCookie = new Cookie(nam, val);
+        cookieList.add(newCookie);
     }
 
     /**
@@ -102,7 +116,7 @@ public class CookieList {
      * @param coo the cookie to add to the list
      */
     public void add(Cookie coo) {
-
+        cookieList.add(coo);
     }
 
     /**
@@ -146,6 +160,17 @@ public class CookieList {
      */
     @Override
     public String toString() {
-        return "";
+        String objStr = "Cookies=[";
+        boolean firstCookie = true;
+
+        for(Cookie c : cookieList) {
+            if(!firstCookie) {
+                objStr += ",";
+            }
+            objStr += c.toString();
+            firstCookie = false;
+        }
+        objStr += "]";
+        return objStr;
     }
 }

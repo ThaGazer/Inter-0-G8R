@@ -28,4 +28,11 @@ public class MessageInput {
     public int read() throws IOException {
         return buffer.read();
     }
+
+/*    public String readUntil() throws IOException {
+        int a;
+        while((a = buffer.read()) != -1) {
+            if(a)
+        }
+    }*/
 }

@@ -25,24 +25,31 @@ import java.util.*;
  * Author:
  *   -Justin Ritter
  */
+
 class CookieListTest {
 
     private List<String> expNames =
             new ArrayList<>(Arrays.asList("Bob", "Ted"));
-    private List<String> expValues = new ArrayList<>(Arrays.asList("1", "2"));
-    private byte[] expBytes = {0x00};
+    private List<String> expValues =
+            new ArrayList<>(Arrays.asList("1", "2"));
 
     private CookieList testCookie;
+    private String expStr = "";
 
     CookieListTest() throws IOException, ValidationException {
-        ByteArrayInputStream bIn = new ByteArrayInputStream(expBytes);
+        for(int i = 0; i < expNames.size(); i++) {
+            expStr += (expNames.get(i) + "=" + expValues.get(i) + "\r\n");
+        }
+        expStr += "\r\n";
+
+        ByteArrayInputStream bIn = new ByteArrayInputStream(expStr.getBytes());
         MessageInput mIn = new MessageInput(bIn);
         testCookie = new CookieList(mIn);
     }
 
     @Test
     void testGetNames() {
-        assertTrue(testCookie.getNames() == expNames);
+        assertTrue(testCookie.getNames().equals(expNames));
     }
 
     @Test
@@ -61,7 +68,7 @@ class CookieListTest {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         MessageOutput out = new MessageOutput(bOut);
         testCookie.encode(out);
-        assertEquals(expBytes, bOut.toByteArray());
+        assertEquals(expStr.getBytes(), bOut.toByteArray());
     }
 
     @Test
