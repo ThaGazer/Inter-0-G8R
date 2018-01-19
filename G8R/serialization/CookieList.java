@@ -16,13 +16,15 @@ import java.util.*;
  */
 public class CookieList {
 
-    private List<Cookie> cookieList;
+    private static final String errDoubleEql = "double equals";
+
+    private Set<Cookie> cookieList;
 
     /**
      * Creates a new, empty cookie list
      */
     public CookieList() {
-        cookieList = new ArrayList<>();
+        cookieList = new TreeSet<>();
     }
 
     /**
@@ -30,7 +32,7 @@ public class CookieList {
      * @param cl list of cookies to clone
      */
     public CookieList(CookieList cl) {
-        cookieList = new ArrayList<>();
+        cookieList = new TreeSet<>();
         cookieList.addAll(cl.cookieList);
     }
 
@@ -44,7 +46,20 @@ public class CookieList {
      */
     public CookieList(MessageInput in)
             throws ValidationException, IOException {
+        cookieList = new TreeSet<>();
 
+        String word;
+        while(!"\n".equals(word = in.readUntil())) {
+            Cookie newCookie = new Cookie();
+            String[] words = word.split("=");
+            if(words.length == 2) {
+                newCookie.setName(words[0]);
+                newCookie.setValue(words[1]);
+                cookieList.add(newCookie);
+            } else {
+                throw new ValidationException(errDoubleEql, word);
+            }
+        }
     }
 
     /**

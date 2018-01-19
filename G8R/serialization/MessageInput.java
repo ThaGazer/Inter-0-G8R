@@ -15,7 +15,10 @@ import java.io.InputStream;
  */
 public class MessageInput {
 
+    private static final String errClosedEarly = "connection closed early";
+
     private InputStream buffer;
+
     /**
      * Constructs a new input source from an InputStream
      * @param in byte input source
@@ -26,13 +29,26 @@ public class MessageInput {
     }
 
     public int read() throws IOException {
-        return buffer.read();
+        int a;
+        if((a = buffer.read()) != -1) {
+            if(a == '\n') {
+                a = buffer.read();
+            }
+            return a;
+        } else {
+            throw new IOException(errClosedEarly);
+        }
     }
 
-/*    public String readUntil() throws IOException {
+    public String readUntil() throws IOException {
         int a;
-        while((a = buffer.read()) != -1) {
-            if(a)
+        String line = "";
+        while((a = read()) != '\n') {
+            line += String.valueOf(a);
         }
-    }*/
+        if(line.isEmpty()) {
+            line = "\n";
+        }
+        return line;
+    }
 }

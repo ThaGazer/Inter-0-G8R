@@ -34,7 +34,7 @@ class CookieListTest {
             new ArrayList<>(Arrays.asList("1", "2"));
 
     private CookieList testCookie;
-    private String expStr = "";
+    private String expStr;
 
     CookieListTest() throws IOException, ValidationException {
         for(int i = 0; i < expNames.size(); i++) {

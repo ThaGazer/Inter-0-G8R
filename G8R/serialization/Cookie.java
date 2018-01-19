@@ -7,10 +7,16 @@
  */
 package serialization;
 
+import java.util.Objects;
+
 public class Cookie {
 
     private String name;
     private String value;
+
+    public Cookie() {
+
+    }
 
     public Cookie(String nam, String val) {
         setName(nam);
@@ -35,12 +41,18 @@ public class Cookie {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(name);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if(obj == this) {
+            return false;
+        }
+        if(!(obj instanceof Cookie)) {
+            return false;
+        }
+        return name.equals((((Cookie) obj).name));
     }
 
     @Override
