@@ -11,30 +11,66 @@ import java.util.Objects;
 
 public class Cookie {
 
+    private static final String errEmptyString = "empty string";
+
     private String name;
     private String value;
 
+    /**
+     * Creates an empty Cookie object
+     */
     public Cookie() {
-
     }
 
-    public Cookie(String nam, String val) {
+    /**
+     * Creates a new Cookie name/value pairing
+     * @param nam name to be added
+     * @param val value to be associated with the name
+     * @throws ValidationException if validation error for name or value
+     */
+    public Cookie(String nam, String val) throws ValidationException {
         setName(nam);
         setValue(val);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    /**
+     * Sets the name of the cookie pairing
+     * @param nam name to change to
+     * @throws ValidationException if validation error for name
+     */
+    public void setName(String nam) throws ValidationException {
+        if(!"".equals(name)) {
+            name = nam;
+        } else {
+            throw new ValidationException(errEmptyString, name);
+        }
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    /**
+     * Sets the value of the cookie pairing
+     * @param val value to change value to
+     * @throws ValidationException if validation error for value
+     */
+    public void setValue(String val) throws ValidationException {
+        if(!"".equals(value)) {
+            value = val;
+        } else {
+            throw new ValidationException(errEmptyString, value);
+        }
     }
 
+    /**
+     * Gets the name of the cookie pairing
+     * @return name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the value of the cookie pairing
+     * @return value
+     */
     public String getValue() {
         return value;
     }
@@ -47,7 +83,7 @@ public class Cookie {
     @Override
     public boolean equals(Object obj) {
         if(obj == this) {
-            return false;
+            return true;
         }
         if(!(obj instanceof Cookie)) {
             return false;

@@ -49,21 +49,23 @@ public class CookieList {
         cookieList = new TreeSet<>();
 
         String word;
-        while(!"\n".equals(word = in.readUntil())) {
-            Cookie newCookie = new Cookie();
-            String[] words = word.split("=");
-            if(words.length == 2) {
-                newCookie.setName(words[0]);
-                newCookie.setValue(words[1]);
-                cookieList.add(newCookie);
-            } else {
-                throw new ValidationException(errDoubleEql, word);
+        if(in.isNull()) {
+            while (!"\n".equals(word = in.readUntil())) {
+                Cookie newCookie = new Cookie();
+                String[] words = word.split("=");
+                if (words.length == 2) {
+                    newCookie.setName(words[0]);
+                    newCookie.setValue(words[1]);
+                    cookieList.add(newCookie);
+                } else {
+                    throw new ValidationException(errDoubleEql, word);
+                }
             }
         }
     }
 
     /**
-     * Creataes a new CookieList by decoding from the console
+     * Creates a new CookieList by decoding from the console
      * @param in console input source
      * @param out prompt output sink
      * @throws NullPointerException if in or out is null
@@ -109,7 +111,12 @@ public class CookieList {
      * @throws NullPointerException if out is null
      */
     public void encode(MessageOutput out) throws IOException {
+        String encodeMsg = "";
 
+        for(Cookie c : cookieList) {
+            encodeMsg += c.toString();
+        }
+        out.write(encodeMsg);
     }
 
     /**
@@ -126,15 +133,6 @@ public class CookieList {
     }
 
     /**
-     * Adds the cookie object to the list. If the name already existsm the new
-     * values replaces the old
-     * @param coo the cookie to add to the list
-     */
-    public void add(Cookie coo) {
-        cookieList.add(coo);
-    }
-
-    /**
      * Gives the current size of the cookie list
      * @return the size of the list
      */
@@ -142,28 +140,20 @@ public class CookieList {
         return cookieList.size();
     }
 
-    /**
-     * Checks if a name is in the list
-     * @param check4 name to check 4
-     * @return if teh name is in the list
-     */
-    public boolean contains(String check4) {
-        for(Cookie cook : cookieList) {
-            if(cook.getName().equals(check4)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public int hashCode() {
-        return 0;
+        return cookieList.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        if(obj == this) {
+            return true;
+        }
+        if(!(obj instanceof CookieList)) {
+            return false;
+        }
+        return cookieList.equals(obj);
     }
 
     /**

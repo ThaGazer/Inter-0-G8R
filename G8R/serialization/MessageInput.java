@@ -1,6 +1,6 @@
 /*
  * serialization:MessageInput
- * 
+ *
  * Date Created: Jan/11/2018
  * Author:
  *   -Justin Ritter
@@ -16,8 +16,10 @@ import java.io.InputStream;
 public class MessageInput {
 
     private static final String errClosedEarly = "connection closed early";
+    private static final String errNullStream = "null input stream";
 
-    private InputStream buffer;
+
+    private InputStream inBuff;
 
     /**
      * Constructs a new input source from an InputStream
@@ -25,14 +27,30 @@ public class MessageInput {
      * @throws NullPointerException if in is null
      */
     public MessageInput(InputStream in) {
-        buffer = in;
+        if(in == null) {
+            throw new NullPointerException(errNullStream);
+        }
+        inBuff = in;
     }
 
+    /**
+     * returns true or false whether or not the stream has been initialized
+     * @return true if the stream is null
+     */
+    public boolean isNull() {
+        return inBuff == null;
+    }
+
+    /**
+     * reads a single byte from the stream
+     * @return the int representation of that byte
+     * @throws IOException if I/O problem
+     */
     public int read() throws IOException {
         int a;
-        if((a = buffer.read()) != -1) {
+        if((a = inBuff.read()) != -1) {
             if(a == '\n') {
-                a = buffer.read();
+                a = inBuff.read();
             }
             return a;
         } else {
@@ -40,6 +58,11 @@ public class MessageInput {
         }
     }
 
+    /**
+     * reads all bytes in the stream until it finds a '\r\n'
+     * @return the string representation of the bytes read
+     * @throws IOException if I/O problems
+     */
     public String readUntil() throws IOException {
         int a;
         String line = "";

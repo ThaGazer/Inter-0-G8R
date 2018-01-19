@@ -11,25 +11,29 @@ import java.io.Serializable;
 
 public class ValidationException extends Exception implements Serializable {
 
+    private String token;
+
     /**
      * Constructs validation exception
-     * @param message exception message
-     * @param token token causing validation failure
+     * @param mess exception message
+     * @param tok token causing validation failure
      * @throws NullPointerException if null parameters
      */
-    public ValidationException(String message, String token) {
-
+    public ValidationException(String mess, String tok) {
+        super(mess);
+        token = tok;
     }
 
     /**
      * Constructs validation exception
-     * @param message exception
-     * @param token token causing validation failure
-     * @param cause exception cause
+     * @param mess exception
+     * @param tok token causing validation failure
+     * @param caus exception cause
      * @throws NullPointerException if null parameters
      */
-    public ValidationException(String message, String token, Throwable cause) {
-
+    public ValidationException(String mess, String tok, Throwable caus) {
+        super(mess, caus);
+        token = tok;
     }
 
     /**
@@ -37,6 +41,6 @@ public class ValidationException extends Exception implements Serializable {
      * @return the token
      */
     public String getToken() {
-        return "";
+        return token;
     }
 }
