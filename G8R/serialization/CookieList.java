@@ -75,7 +75,6 @@ public class CookieList {
      * @throws NullPointerException if in or out is null
      */
     public CookieList(Scanner in, PrintStream out) {
-
     }
 
     /**
@@ -115,14 +114,18 @@ public class CookieList {
      * @throws NullPointerException if out is null
      */
     public void encode(MessageOutput out) throws IOException {
-        String encodeMsg = "";
+        if(!out.isNull()) {
+            String encodeMsg = "";
 
-        for(Cookie c : cookieList) {
-            encodeMsg += c.toString();
+            for(Cookie c : cookieList) {
+                encodeMsg += c.toString();
+                encodeMsg += lineEnding;
+            }
             encodeMsg += lineEnding;
+            out.write(encodeMsg);
+        } else {
+            throw new NullPointerException(errNull);
         }
-        encodeMsg += lineEnding;
-        out.write(encodeMsg);
     }
 
     /**
