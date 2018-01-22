@@ -42,14 +42,15 @@ public class MessageInput {
     }
 
     /**
-     * reads a single byte from the stream
+     * reads a single byte from the stream. If a '\r' is read then it will read
+     * the next character automatically
      * @return the int representation of that byte
      * @throws IOException if I/O problem
      */
     public int read() throws IOException {
         int a;
         if((a = inBuff.read()) != -1) {
-            if(a == '\n') {
+            if(a == '\r') {
                 a = inBuff.read();
             }
             return a;
@@ -59,7 +60,8 @@ public class MessageInput {
     }
 
     /**
-     * reads all bytes in the stream until it finds a '\r\n'
+     * reads all bytes in the stream until it finds a '\r\n'. returns '\n'
+     * if nothing was read
      * @return the string representation of the bytes read
      * @throws IOException if I/O problems
      */

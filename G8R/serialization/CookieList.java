@@ -9,6 +9,7 @@ package serialization;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -17,6 +18,8 @@ import java.util.*;
 public class CookieList {
 
     private static final String errDoubleEql = "double equals";
+
+    private static final String lineEnding = "\r\n";
 
     private Set<Cookie> cookieList;
 
@@ -115,7 +118,9 @@ public class CookieList {
 
         for(Cookie c : cookieList) {
             encodeMsg += c.toString();
+            encodeMsg += lineEnding;
         }
+        encodeMsg += lineEnding;
         out.write(encodeMsg);
     }
 
