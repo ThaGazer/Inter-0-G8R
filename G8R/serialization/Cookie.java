@@ -9,7 +9,7 @@ package serialization;
 
 import java.util.Objects;
 
-public class Cookie {
+public class Cookie implements Comparable<Cookie> {
 
     private static final String errEmptyString = "empty string";
 
@@ -92,7 +92,13 @@ public class Cookie {
     }
 
     @Override
+    public int compareTo(Cookie o) {
+        return getName().compareTo(o.getName());
+    }
+
+    @Override
     public String toString(){
         return getName() + "=" + getValue();
     }
+
 }

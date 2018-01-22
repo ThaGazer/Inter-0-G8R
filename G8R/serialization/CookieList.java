@@ -17,6 +17,7 @@ import java.util.*;
 public class CookieList {
 
     private static final String errDoubleEql = "double equals";
+    private static final String errNull = "empty object";
 
     private Set<Cookie> cookieList;
 
@@ -49,7 +50,7 @@ public class CookieList {
         cookieList = new TreeSet<>();
 
         String word;
-        if(in.isNull()) {
+        if(!in.isNull()) {
             while (!"\n".equals(word = in.readUntil())) {
                 Cookie newCookie = new Cookie();
                 String[] words = word.split("=");
@@ -79,7 +80,7 @@ public class CookieList {
      * @return Set (potentially empty) of names (strings) for this list
      */
     public Set<String> getNames() {
-        Set<String> names = new HashSet<>();
+        Set<String> names = new TreeSet<>();
 
         for(Cookie c : cookieList) {
             names.add(c.getName());
@@ -114,8 +115,9 @@ public class CookieList {
         String encodeMsg = "";
 
         for(Cookie c : cookieList) {
-            encodeMsg += c.toString();
+            encodeMsg += (c.toString() + "\r\n");
         }
+        encodeMsg += "\r\n";
         out.write(encodeMsg);
     }
 
@@ -130,6 +132,18 @@ public class CookieList {
     public void add(String nam, String val) throws ValidationException {
         Cookie newCookie = new Cookie(nam, val);
         cookieList.add(newCookie);
+    }
+
+    /**
+     *
+     * @param c
+     */
+    public void add(Cookie c) {
+        if(c != null) {
+            cookieList.add(c);
+        } else {
+            throw new NullPointerException(errNull);
+        }
     }
 
     /**

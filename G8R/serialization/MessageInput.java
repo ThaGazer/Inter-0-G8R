@@ -49,7 +49,7 @@ public class MessageInput {
     public int read() throws IOException {
         int a;
         if((a = inBuff.read()) != -1) {
-            if(a == '\n') {
+            if(a == '\r') {
                 a = inBuff.read();
             }
             return a;
@@ -67,7 +67,7 @@ public class MessageInput {
         int a;
         String line = "";
         while((a = read()) != '\n') {
-            line += String.valueOf(a);
+            line += (char)a;
         }
         if(line.isEmpty()) {
             line = "\n";
