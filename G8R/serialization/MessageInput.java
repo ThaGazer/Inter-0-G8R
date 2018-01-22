@@ -69,7 +69,7 @@ public class MessageInput {
         int a;
         String line = "";
         while((a = read()) != '\n') {
-            line += String.valueOf(a);
+            line += (char)a;
         }
         if(line.isEmpty()) {
             line = "\n";

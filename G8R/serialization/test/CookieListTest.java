@@ -34,22 +34,31 @@ class CookieListTest {
             new ArrayList<>(Arrays.asList("1", "2"));
 
     private CookieList testCookie;
-    private String expStr;
+    private String expByte = "";
+    private String expStr = "Cookies=[";
 
     CookieListTest() throws IOException, ValidationException {
+        boolean firstAdd = true;
         for(int i = 0; i < expNames.size(); i++) {
-            expStr += (expNames.get(i) + "=" + expValues.get(i) + "\r\n");
+            expByte += (expNames.get(i) + "=" + expValues.get(i) + "\r\n");
+            if(!firstAdd) {
+                expStr += ",";
+            }
+            expStr += (expNames.get(i) + "=" + expValues.get(i));
+            firstAdd = false;
         }
-        expStr += "\r\n";
+        expStr += "]";
+        expByte += "\r\n";
 
-        ByteArrayInputStream bIn = new ByteArrayInputStream(expStr.getBytes());
+        ByteArrayInputStream bIn = new ByteArrayInputStream(expByte.getBytes());
         MessageInput mIn = new MessageInput(bIn);
         testCookie = new CookieList(mIn);
     }
 
     @Test
     void testGetNames() {
-        assertTrue(testCookie.getNames().equals(expNames));
+        Set<String> expSetNames = new HashSet<>(expNames);
+        assertEquals(expSetNames, testCookie.getNames());
     }
 
     @Test
@@ -68,7 +77,7 @@ class CookieListTest {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         MessageOutput out = new MessageOutput(bOut);
         testCookie.encode(out);
-        assertEquals(expStr.getBytes(), bOut.toByteArray());
+        assertArrayEquals(expByte.getBytes(), bOut.toByteArray());
     }
 
     @Test
@@ -76,7 +85,7 @@ class CookieListTest {
         int oldSize = testCookie.size();
         testCookie.add("newName", "1");
         assertEquals(oldSize+1, testCookie.size());
-        assertTrue(testCookie.contains("newName"));
+        assertTrue(testCookie.getValue("newName") != null);
     }
 
     @Test
@@ -120,8 +129,7 @@ class CookieListTest {
 
     @Test
     void testToString() {
-        String shldBMessage = "?";
-        assertEquals(shldBMessage, testCookie.toString());
+        assertEquals(expStr, testCookie.toString());
     }
 
 }
