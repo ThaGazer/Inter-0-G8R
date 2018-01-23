@@ -1,31 +1,26 @@
 /*
- * serialization.test:CookieListConstructorTest
+ * serialization.test:CookieListTest
  *
  * Date Created: Jan/13/2018
  * Author:
  *   -Justin Ritter
+ *   -Clint Masters
  */
 package serialization.test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.*;
 import serialization.CookieList;
 import serialization.MessageInput;
 import serialization.MessageOutput;
 import serialization.ValidationException;
-
 import java.io.*;
 import java.util.*;
 
-
-/*
- * serialization:CookieListTest
- * 
- * Date Created: Jan/13/2018
- * Author:
- *   -Justin Ritter
+/**
+ * test the non-constructor functions in CookieList
  */
-
 class CookieListTest {
 
     private List<String> expNames =

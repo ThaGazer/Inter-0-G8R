@@ -115,14 +115,10 @@ public class CookieList {
      * @throws NullPointerException if out is null
      */
     public void encode(MessageOutput out) throws IOException {
-        String encodeMsg = "";
-
         for(Cookie c : cookieList) {
-            encodeMsg += c.toString();
-            encodeMsg += lineEnding;
+            out.write(c.toString() + lineEnding);
         }
-        encodeMsg += lineEnding;
-        out.write(encodeMsg);
+        out.write(lineEnding);
     }
 
     /**
