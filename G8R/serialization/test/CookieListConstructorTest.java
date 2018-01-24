@@ -1,6 +1,6 @@
 /*
  * serialization.test:CookieListTestConstruct
- * 
+ *
  * Date Created: Jan/18/2018
  * Author:
  *   -Justin Ritter
@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-class CookieListTestConstructor {
+class CookieListConstructorTest {
     private List<String> expNames =
             new ArrayList<>(Arrays.asList("Test", "Cookie"));
     private List<String> expValues =
@@ -29,7 +29,7 @@ class CookieListTestConstructor {
     /**********************************************************
      * Tests for the constructor passed another CookieList
      *********************************************************/
-    public CookieListTestConstructor() {
+    public CookieListConstructorTest() {
 
     }
 
@@ -40,7 +40,8 @@ class CookieListTestConstructor {
      * @throws ValidationException if the message in messageInput is bad
      */
     @Test
-    void testCookieListCookieListSuccess() throws IOException, ValidationException {
+    void testCookieListCookieListSuccess()
+            throws IOException, ValidationException {
         String expStr="";
         for(int i = 0; i < expNames.size(); i++) {
             expStr += (expNames.get(i) + "=" + expValues.get(i) + "\r\n");
