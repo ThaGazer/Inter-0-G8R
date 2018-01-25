@@ -18,9 +18,13 @@ import java.util.*;
 public class CookieList {
 
     private static final String errDoubleEql = "double equals";
-    private static final String errNull = "empty object";
+    private static final String errNullCookie = "empty cookie object";
+    private static final String errNullMessageOutput =
+            "empty MessageOutput object";
 
     private static final String lineEnding = "\r\n";
+    private static final String delim = "=";
+    private static final String emptyStr = "";
 
     private Set<Cookie> cookieList;
 
@@ -56,7 +60,7 @@ public class CookieList {
         if(!in.isNull()) {
             while (!"\n".equals(word = in.readUntil())) {
                 Cookie newCookie = new Cookie();
-                String[] words = word.split("=");
+                String[] words = word.split(delim);
                 if (words.length == 2) {
                     newCookie.setName(words[0]);
                     newCookie.setValue(words[1]);
@@ -96,7 +100,7 @@ public class CookieList {
      * @return value associated with the given name or null if no such name
      */
     public String getValue(String name) {
-        if(name != null && !name.equals("")) {
+        if(name != null && !name.equals(emptyStr)) {
             for (Cookie c : cookieList) {
                 if (c.getName().equals(name)) {
                     return c.getValue();
@@ -120,7 +124,7 @@ public class CookieList {
             }
             out.write(lineEnding);
         } else {
-            throw new NullPointerException(errNull);
+            throw new NullPointerException(errNullMessageOutput);
         }
     }
 
@@ -133,20 +137,31 @@ public class CookieList {
      * @throws NullPointerException if name or value is null
      */
     public void add(String nam, String val) throws ValidationException {
-        Cookie newCookie = new Cookie(nam, val);
-        cookieList.add(newCookie);
+        add(new Cookie(nam, val));
     }
 
     /**
-     *
-     * @param c
+     * Adds the cookie. If the name already exists, the new value
+     * replaces the old value
+     * @param c cookie to add
+     * @throws NullPointerException if cookie is null
      */
     public void add(Cookie c) {
-        if(c != null) {
-            cookieList.add(c);
+        c = Objects.requireNonNull(c, errNullCookie);
+        if(contains(c)) {
+            
         } else {
-            throw new NullPointerException(errNull);
+            cookieList.add(c);
         }
+    }
+
+    /**
+     * checks if the cookieList already contains nam
+     * @param nam name to find in cookieList
+     * @return true if name is found
+     */
+    public boolean contains(String nam) {
+        return getNames().contains(nam);
     }
 
     /**

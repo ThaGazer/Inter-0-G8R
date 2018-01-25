@@ -9,7 +9,6 @@
 package serialization.test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.*;
 import serialization.CookieList;
 import serialization.MessageInput;
@@ -21,7 +20,9 @@ import java.util.*;
 /**
  * test the non-constructor functions in CookieList
  */
-class CookieListTest {
+@DisplayName("Method test")
+@Nested
+public class CookieListTest {
 
     private List<String> expNames =
             new ArrayList<>(Arrays.asList("Bob", "Ted"));
@@ -126,5 +127,5 @@ class CookieListTest {
     void testToString() {
         assertEquals(expStr, testCookie.toString());
     }
-
 }
+

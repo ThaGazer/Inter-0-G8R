@@ -13,6 +13,10 @@ public class Cookie implements Comparable<Cookie> {
 
     private static final String errEmptyString = "empty string";
 
+    private static final String emptyStr = "";
+    private static final String delim = "=";
+
+
     private String name;
     private String value;
 
@@ -39,7 +43,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for name
      */
     public void setName(String nam) throws ValidationException {
-        if(!"".equals(name)) {
+        if(!emptyStr.equals(name)) {
             name = nam;
         } else {
             throw new ValidationException(errEmptyString, name);
@@ -52,7 +56,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for value
      */
     public void setValue(String val) throws ValidationException {
-        if(!"".equals(value)) {
+        if(!emptyStr.equals(value)) {
             value = val;
         } else {
             throw new ValidationException(errEmptyString, value);
@@ -98,7 +102,7 @@ public class Cookie implements Comparable<Cookie> {
 
     @Override
     public String toString(){
-        return getName() + "=" + getValue();
+        return getName() + delim + getValue();
     }
 
 }
