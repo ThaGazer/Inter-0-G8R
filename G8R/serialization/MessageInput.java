@@ -60,8 +60,8 @@ public class MessageInput {
     }
 
     /**
-     * reads all bytes in the stream until it finds a '\r\n'. returns '\n'
-     * if nothing was read
+     * reads all bytes in the stream until it finds a '\r\n'. Returns an empty
+     * string if nothing was read or found an ending before other characters
      * @return the string representation of the bytes read
      * @throws IOException if I/O problems
      */
@@ -70,9 +70,6 @@ public class MessageInput {
         String line = "";
         while((a = read()) != '\n') {
             line += (char)a;
-        }
-        if(line.isEmpty()) {
-            line = "\n";
         }
         return line;
     }

@@ -15,10 +15,9 @@ import java.io.IOException;
  */
 public class G8RMessage {
 
-    private static final String errNull = "null object";
+    private static final String errNullMessageOut = "Null MessageOutput object";
 
     public G8RMessage() {
-
     }
 
     /**
@@ -43,7 +42,7 @@ public class G8RMessage {
      */
     public void encode(MessageOutput out) throws IOException {
         if(out == null) {
-            throw new NullPointerException(errNull);
+            throw new NullPointerException(errNullMessageOut);
         }
     }
 }

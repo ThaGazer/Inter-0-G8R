@@ -9,7 +9,6 @@ package serialization;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -17,10 +16,10 @@ import java.util.*;
  */
 public class CookieList {
 
-    private static final String errDoubleEql = "double equals";
     private static final String errNullCookie = "empty cookie object";
-    private static final String errNullMessageOutput =
-            "empty MessageOutput object";
+    private static final String errNullMessageOut = "Null MessageOutput object";
+    private static final String errCookieFormat =
+            "incorrect serialization of cookie";
 
     private static final String lineEnding = "\r\n";
     private static final String delim = "=";
@@ -58,7 +57,7 @@ public class CookieList {
 
         String word;
         if(!in.isNull()) {
-            while (!"\n".equals(word = in.readUntil())) {
+            while (!emptyStr.equals(word = in.readUntil())) {
                 Cookie newCookie = new Cookie();
                 String[] words = word.split(delim);
                 if (words.length == 2) {
@@ -66,7 +65,7 @@ public class CookieList {
                     newCookie.setValue(words[1]);
                     cookieList.add(newCookie);
                 } else {
-                    throw new ValidationException(errDoubleEql, word);
+                    throw new ValidationException(errCookieFormat, word);
                 }
             }
         }
@@ -100,7 +99,7 @@ public class CookieList {
      * @return value associated with the given name or null if no such name
      */
     public String getValue(String name) {
-        if(name != null && !name.equals(emptyStr)) {
+        if(name != null && !emptyStr.equals(name)) {
             for (Cookie c : cookieList) {
                 if (c.getName().equals(name)) {
                     return c.getValue();
@@ -111,7 +110,7 @@ public class CookieList {
     }
 
     /**
-     * Encode the name-value list. The name-value pair serizlization must be
+     * Encode the name-value list. The name-value pair serialization must be
      * in sort order (alphabetically by name in increasing order)
      * @param out serialization output sink
      * @throws IOException if I/O problem
@@ -124,7 +123,7 @@ public class CookieList {
             }
             out.write(lineEnding);
         } else {
-            throw new NullPointerException(errNullMessageOutput);
+            throw new NullPointerException(errNullMessageOut);
         }
     }
 
@@ -148,20 +147,44 @@ public class CookieList {
      */
     public void add(Cookie c) {
         c = Objects.requireNonNull(c, errNullCookie);
-        if(contains(c)) {
-            
+        if(contains(c.getName())) {
+            remove(c);
+            cookieList.add(c);
         } else {
             cookieList.add(c);
         }
     }
 
     /**
-     * checks if the cookieList already contains nam
-     * @param nam name to find in cookieList
-     * @return true if name is found
+     * removes a cookie from the list
+     * @param nam name of cookie
+     * @return if cookie was successfully removed
+     * @throws ValidationException if cookie issues
+     * @throws NullPointerException if name is null
      */
-    public boolean contains(String nam) {
-        return getNames().contains(nam);
+    public boolean remove(String nam) throws ValidationException {
+        return remove(new Cookie(nam, ""));
+    }
+
+    /**
+     * removes a cookie from the list
+     * @param c cookie to remove
+     * @return if cookie was successfully removed
+     * @throws NullPointerException if null cookie
+     */
+    public boolean remove(Cookie c) {
+        c = Objects.requireNonNull(c);
+
+        return cookieList.remove(c);
+    }
+
+    /**
+     * check if the cookie list contains a name
+     * @param name name of cookie to search for
+     * @return true if cookie is found
+     */
+    public boolean contains(String name) {
+        return getValue(name) != null;
     }
 
     /**
