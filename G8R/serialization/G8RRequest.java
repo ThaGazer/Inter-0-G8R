@@ -7,10 +7,19 @@
  */
 package serialization;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Represents a G8R request and provides serialization/deserialization
  */
 public class G8RRequest extends G8RMessage {
+
+    private static final String errCommand = "incorrect command parameter";
+
+    private static final String val_Command = "RUN";
+    private static final String val_Type = "Q";
 
     private String function;
     private String[] params;
@@ -20,7 +29,34 @@ public class G8RRequest extends G8RMessage {
      * creates an empty G8R request
      */
     public G8RRequest() {
+    }
 
+    /**
+     * Creates a new G8RR request using a MessageInput stream
+     * @param in input sink
+     * @throws ValidationException if error with given parameters
+     * @throws IOException if I/O problem
+     * @throws NullPointerException if null parameter
+     */
+    public G8RRequest(MessageInput in) throws IOException, ValidationException {
+        if(in.isNull()) {
+            throw new NullPointerException(errNullMessageIn);
+        }
+
+        //what does this command do?
+        String tmpCommand;
+        if(!val_Command.equals(tmpCommand = in.readUntil(delim_Space))) {
+            throw new ValidationException(errCommand, tmpCommand);
+        }
+
+        //reads function
+        setFunction(in.readUntil(delim_Space));
+
+        //reads all params
+        setParams(in.readUntil(delim_LineEnd).split(delim_Space));
+
+        //reads in cookies
+        setCookieList(new CookieList(in));
     }
 
     /**
@@ -33,7 +69,37 @@ public class G8RRequest extends G8RMessage {
      */
     public G8RRequest(String funct, String[] para, CookieList cook)
             throws ValidationException {
+        setFunction(funct);
+        setParams(para);
+        setCookieList(cook);
+    }
 
+    /**
+     * encodes a G8RRequest to the output sink
+     * @param out serialization output sink
+     * @throws IOException if write issues
+     */
+    public void encode(MessageOutput out) throws IOException {
+        //writes header
+        super.encode(out);
+
+        //writes type of message
+        out.write(val_Type);
+
+        //writes the command
+        out.write(val_Command);
+
+        //writes the message function
+        out.write(function);
+
+        //writes out all parameters
+        for(String s : params) {
+            out.write(delim_Space + s);
+        }
+        out.write(lineEnd);
+
+        //writes out the cookie list
+        cookies.encode(out);
     }
 
     /**
@@ -53,7 +119,7 @@ public class G8RRequest extends G8RMessage {
     }
 
     /**
-     * retruns parameters
+     * returns parameters
      * @return parameters
      */
     public String[] getParams() {
@@ -66,7 +132,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null cookie list
      */
     public void setCookieList(CookieList cl) {
-        cookies = cl;
+        cookies = Objects.requireNonNull(cl);
     }
 
     /**
@@ -76,7 +142,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null command
      */
     public void setFunction(String funct) throws ValidationException {
-        function = funct;
+        function = Objects.requireNonNull(funct);
     }
 
     /**
@@ -86,7 +152,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null array or array elements
      */
     public void setParams(String[] para) throws ValidationException {
-        params = para;
+        params = Objects.requireNonNull(para);
     }
 
     /**
@@ -96,6 +162,8 @@ public class G8RRequest extends G8RMessage {
      */
     @Override
     public String toString() {
-        return "";
+        return super.toString() + val_Type + "Function=" + getFunction() +
+                "Parameters=" + Arrays.toString(getParams()) +
+                getCookieList().toString();
     }
 }

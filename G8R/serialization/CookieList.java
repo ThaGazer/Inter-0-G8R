@@ -21,8 +21,9 @@ public class CookieList {
     private static final String errCookieFormat =
             "incorrect serialization of cookie";
 
-    private static final String lineEnding = "\r\n";
-    private static final String delim = "=";
+    private static final String delim_LineEnding = "\r\n";
+    private static final String delim_NameValue = "=";
+    private static final String delim_Cookie = "\n";
     private static final String emptyStr = "";
 
     private Set<Cookie> cookieList;
@@ -57,9 +58,9 @@ public class CookieList {
 
         String word;
         if(!in.isNull()) {
-            while (!emptyStr.equals(word = in.readUntil())) {
+            while (!emptyStr.equals(word = in.readUntil(delim_Cookie))) {
                 Cookie newCookie = new Cookie();
-                String[] words = word.split(delim);
+                String[] words = word.split(delim_NameValue);
                 if (words.length == 2) {
                     newCookie.setName(words[0]);
                     newCookie.setValue(words[1]);
@@ -119,9 +120,9 @@ public class CookieList {
     public void encode(MessageOutput out) throws IOException {
         if(!out.isNull()) {
             for (Cookie c : cookieList) {
-                out.write(c.toString() + lineEnding);
+                out.write(c.toString() + delim_LineEnding);
             }
-            out.write(lineEnding);
+            out.write(delim_LineEnding);
         } else {
             throw new NullPointerException(errNullMessageOut);
         }
@@ -202,13 +203,8 @@ public class CookieList {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == this) {
-            return true;
-        }
-        if(!(obj instanceof CookieList)) {
-            return false;
-        }
-        return cookieList.equals(obj);
+        return obj == this ||
+                obj instanceof CookieList && cookieList.equals(obj);
     }
 
     /**

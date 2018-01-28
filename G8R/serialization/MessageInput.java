@@ -60,15 +60,15 @@ public class MessageInput {
     }
 
     /**
-     * reads all bytes in the stream until it finds a '\r\n'. Returns an empty
-     * string if nothing was read or found an ending before other characters
+     * reads all bytes in the stream until it finds the deliminator.
+     * Uses the first position in the string passed in as the deliminator
      * @return the string representation of the bytes read
      * @throws IOException if I/O problems
      */
-    public String readUntil() throws IOException {
+    public String readUntil(String delim) throws IOException {
         int a;
         String line = "";
-        while((a = read()) != '\n') {
+        while((a = read()) != delim.charAt(0)) {
             line += (char)a;
         }
         return line;
