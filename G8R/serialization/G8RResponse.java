@@ -32,7 +32,8 @@ public class G8RResponse extends G8RMessage {
     public G8RResponse() {
     }
 
-    public G8RResponse(MessageInput in) throws IOException, ValidationException {
+    public G8RResponse(MessageInput in)
+            throws IOException, ValidationException {
         if(in.isNull()) {
             throw new NullPointerException(errNullMessageIn);
         }
@@ -175,8 +176,8 @@ public class G8RResponse extends G8RMessage {
      * @return string representation
      */
     public String toString() {
-        return super.toString() + val_Type + "Status=" + getStatus() + "Function=" +
-                getFunction() + "Message=" + getMessage() +
+        return super.toString() + val_Type + "Status=" + getStatus() +
+                "Function=" + getFunction() + "Message=" + getMessage() +
                 getCookieList().toString();
     }
 }
