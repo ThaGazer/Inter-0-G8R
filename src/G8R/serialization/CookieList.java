@@ -5,7 +5,7 @@
  * Author:
  *   -Justin Ritter
  */
-package serialization;
+package G8R.serialization;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -26,13 +26,13 @@ public class CookieList {
     private static final String delim_Cookie = "\n";
     private static final String emptyStr = "";
 
-    private Set<Cookie> cookieList;
+    private Set<Cookie> cookieList = new TreeSet<>();
+    ;
 
     /**
      * Creates a new, empty cookie list
      */
     public CookieList() {
-        cookieList = new TreeSet<>();
     }
 
     /**
@@ -40,7 +40,6 @@ public class CookieList {
      * @param cl list of cookies to clone
      */
     public CookieList(CookieList cl) {
-        cookieList = new TreeSet<>();
         cookieList.addAll(cl.cookieList);
     }
 
@@ -54,7 +53,6 @@ public class CookieList {
      */
     public CookieList(MessageInput in)
             throws ValidationException, IOException {
-        cookieList = new TreeSet<>();
 
         String word;
         if(!in.isNull()) {
@@ -86,7 +84,7 @@ public class CookieList {
      * @return Set (potentially empty) of names (strings) for this list
      */
     public Set<String> getNames() {
-        Set<String> names = new TreeSet<>();
+        Set<String> names = new HashSet<>();
 
         for(Cookie c : cookieList) {
             names.add(c.getName());

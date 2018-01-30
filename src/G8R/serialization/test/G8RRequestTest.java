@@ -5,11 +5,11 @@
  * Author(s):
  * -Justin Ritter
  */
-package serialization.test;
+package G8R.serialization.test;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import serialization.*;
+import G8R.serialization.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

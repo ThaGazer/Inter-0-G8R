@@ -5,7 +5,7 @@
  * Author:
  *   -Justin Ritter
  */
-package serialization;
+package G8R.serialization;
 
 import java.io.Serializable;
 import java.util.Objects;

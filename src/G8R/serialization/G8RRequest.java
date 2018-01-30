@@ -5,7 +5,7 @@
  * Author(s):
  * -Justin Ritter
  */
-package serialization;
+package G8R.serialization;
 
 import java.io.IOException;
 import java.util.Arrays;

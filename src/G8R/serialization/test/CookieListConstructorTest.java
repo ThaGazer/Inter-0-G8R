@@ -6,10 +6,10 @@
  *   -Justin Ritter
  *   -Clint Masters
  */
-package serialization.test;
+package G8R.serialization.test;
 
 import org.junit.jupiter.api.DisplayName;
-import serialization.*;
+import G8R.serialization.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

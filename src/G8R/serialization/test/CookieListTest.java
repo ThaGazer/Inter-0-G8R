@@ -6,14 +6,14 @@
  *   -Justin Ritter
  *   -Clint Masters
  */
-package serialization.test;
+package G8R.serialization.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
-import serialization.CookieList;
-import serialization.MessageInput;
-import serialization.MessageOutput;
-import serialization.ValidationException;
+import G8R.serialization.CookieList;
+import G8R.serialization.MessageInput;
+import G8R.serialization.MessageOutput;
+import G8R.serialization.ValidationException;
 import java.io.*;
 import java.util.*;
 
