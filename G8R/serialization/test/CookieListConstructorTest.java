@@ -8,6 +8,7 @@
  */
 package serialization.test;
 
+import org.junit.jupiter.api.DisplayName;
 import serialization.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
+@DisplayName("CookieList_Constructor test")
 class CookieListConstructorTest {
     private List<String> expNames =
             new ArrayList<>(Arrays.asList("Test", "Cookie"));

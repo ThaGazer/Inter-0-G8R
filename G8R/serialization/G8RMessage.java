@@ -26,11 +26,8 @@ public class G8RMessage {
     protected static final String delim_Space = " ";
     protected static final String delim_LineEnd = "\n";
 
-    public G8RMessage() {
-    }
-
     /**
-     * Creates a new G8R message by deserializing from the given
+     * Creates a new G8R message by deserialization from the given
      * input according to the specified serialization.
      * @param in user input source
      * @return new G8R message

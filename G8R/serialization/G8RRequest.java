@@ -45,7 +45,8 @@ public class G8RRequest extends G8RMessage {
 
         //what does this command do?
         String tmpCommand;
-        if(!val_Command.equals(tmpCommand = in.readUntil(delim_Space))) {
+        if(!val_Command.equals(tmpCommand =
+                in.readUntil(delim_Space).toUpperCase())) {
             throw new ValidationException(errCommand, tmpCommand);
         }
 

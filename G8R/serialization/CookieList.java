@@ -210,7 +210,7 @@ public class CookieList {
     /**
      * Returns string representation of cookie list. The name-value pair
      * serialization must be in sort order
-     * (alphabetically by nae in increaseing order).
+     * (alphabetically by nae in increasing order).
      * Cookies=[a=1,b=2]
      * @return string representation of cooke list
      */

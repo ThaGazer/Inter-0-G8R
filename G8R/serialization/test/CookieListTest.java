@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * test the non-constructor functions in CookieList
  */
-@DisplayName("Method test")
+@DisplayName("CookieList_method test")
 @Nested
 public class CookieListTest {
 

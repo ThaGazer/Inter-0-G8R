@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("Request_method test")
 public class G8RRequestTest {
 
     private G8RRequest res;

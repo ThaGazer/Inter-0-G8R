@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("G8RResponse test")
+@DisplayName("response_method test")
 @Nested
 public class G8RResponseTest {
 
