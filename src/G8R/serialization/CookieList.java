@@ -23,7 +23,6 @@ public class CookieList {
 
     private static final String delim_LineEnding = "\r\n";
     private static final String delim_NameValue = "=";
-    private static final String delim_Cookie = "\n";
     private static final String emptyStr = "";
 
     private Set<Cookie> cookieList = new TreeSet<>();
@@ -56,13 +55,10 @@ public class CookieList {
 
         String word;
         if(!in.isNull()) {
-            while (!emptyStr.equals(word = in.readUntil(delim_Cookie))) {
-                Cookie newCookie = new Cookie();
+            while (!emptyStr.equals(word = in.readUntil(delim_LineEnding))) {
                 String[] words = word.split(delim_NameValue);
                 if (words.length == 2) {
-                    newCookie.setName(words[0]);
-                    newCookie.setValue(words[1]);
-                    cookieList.add(newCookie);
+                    cookieList.add(new Cookie(words[0], words[1]));
                 } else {
                     throw new ValidationException(errCookieFormat, word);
                 }

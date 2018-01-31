@@ -45,7 +45,7 @@ public class G8RResponse extends G8RMessage {
         setFunction(in.readUntil(delim_Space));
 
         //reads in message
-        setMessage(in.readUntil(delim_Space));
+        setMessage(in.readUntil(delim_LineEnd));
 
         //reads in cookielist
         setCookieList(new CookieList(in));
@@ -91,7 +91,7 @@ public class G8RResponse extends G8RMessage {
         out.write(getFunction() + delim_Space);
 
         //writes out messages' message
-        out.write(getMessage() + lineEnd);
+        out.write(getMessage() + delim_LineEnd);
 
         //writes out messages' cookielist
         getCookieList().encode(out);

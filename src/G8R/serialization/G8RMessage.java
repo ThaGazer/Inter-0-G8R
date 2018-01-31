@@ -22,9 +22,8 @@ public class G8RMessage {
     protected static final String errType = "Not a G8RMessage type";
 
     protected static final String val_G8Rheader = "G8R/1.0";
-    protected static final String lineEnd = "\r\n";
     protected static final String delim_Space = " ";
-    protected static final String delim_LineEnd = "\n";
+    protected static final String delim_LineEnd = "\r\n";
 
     /**
      * Creates a new G8R message by deserialization from the given
@@ -46,11 +45,11 @@ public class G8RMessage {
             throw new ValidationException(errHeader, header);
         }
 
-        String type = in.readUntil(delim_Space).toLowerCase();
+        String type = in.readUntil(delim_Space);
         switch(type) {
-            case "q":
+            case "Q":
                 return new G8RRequest(in);
-            case "r":
+            case "R":
                 return new G8RResponse(in);
             default:
                 throw new ValidationException(errType, type);

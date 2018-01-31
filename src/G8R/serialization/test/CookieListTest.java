@@ -60,6 +60,7 @@ public class CookieListTest {
     @Test
     void testGetValue() {
         List<String> names = new ArrayList<>(testCookie.getNames());
+        Collections.sort(names);
 
         int i = 0;
         for(String n : names) {

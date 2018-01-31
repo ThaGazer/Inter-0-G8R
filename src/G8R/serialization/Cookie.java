@@ -43,7 +43,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for name
      */
     public void setName(String nam) throws ValidationException {
-        if(!emptyStr.equals(name)) {
+        if(!emptyStr.equals(nam)) {
             name = nam;
         } else {
             throw new ValidationException(errEmptyString, name);

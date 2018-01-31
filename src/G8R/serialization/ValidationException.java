@@ -54,4 +54,9 @@ public class ValidationException extends Exception implements Serializable {
     private void setToken(String tok) {
         token = Objects.requireNonNull(tok, errEmptyTok);
     }
+
+    public void printStackTrace() {
+        System.err.println(getToken());
+        super.printStackTrace();
+    }
 }

@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class G8RResponseTest {
 
     private G8RResponse res;
-    private String message = "G8R/1.0 R status funct " +
+    private String message = "G8R/1.0 R OK funct " +
             "this is a message\r\nx=1\r\ny=2\r\n\r\n";
 
     public G8RResponseTest() throws IOException, ValidationException {
@@ -60,7 +60,7 @@ public class G8RResponseTest {
     @DisplayName("setStatus")
     @Test
     public void setStatusTest() throws ValidationException {
-        String status = "valid";
+        String status = "ERROR";
         res.setStatus(status);
         assertEquals(status, res.getStatus());
     }

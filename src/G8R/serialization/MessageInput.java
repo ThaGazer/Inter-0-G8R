@@ -42,17 +42,13 @@ public class MessageInput {
     }
 
     /**
-     * reads a single byte from the stream. If a '\r' is read then it will read
-     * the next character automatically
+     * reads a single byte from the stream.
      * @return the int representation of that byte
      * @throws IOException if I/O problem
      */
     public int read() throws IOException {
         int a;
         if((a = inBuff.read()) != -1) {
-            if(a == '\r') {
-                a = inBuff.read();
-            }
             return a;
         } else {
             throw new IOException(errClosedEarly);
@@ -61,16 +57,14 @@ public class MessageInput {
 
     /**
      * reads all bytes in the stream until it finds the deliminator.
-     * Uses the first position in the string passed in as the deliminator
-     * @return the string representation of the bytes read
+     * @return the string representation of the bytes read minus the deliminator
      * @throws IOException if I/O problems
      */
     public String readUntil(String delim) throws IOException {
-        int a;
         String line = "";
-        while((a = read()) != delim.charAt(0)) {
-            line += (char)a;
+        while(!line.contains(delim)) {
+            line += (char)read();
         }
-        return line;
+        return line.substring(0,(line.length()-delim.length()));
     }
 }

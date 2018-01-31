@@ -46,7 +46,7 @@ public class G8RRequest extends G8RMessage {
         //what does this command do?
         String tmpCommand;
         if(!val_Command.equals(tmpCommand =
-                in.readUntil(delim_Space).toUpperCase())) {
+                in.readUntil(delim_Space))) {
             throw new ValidationException(errCommand, tmpCommand);
         }
 
@@ -85,10 +85,10 @@ public class G8RRequest extends G8RMessage {
         super.encode(out);
 
         //writes type of message
-        out.write(val_Type);
+        out.write(val_Type + delim_Space);
 
         //writes the command
-        out.write(val_Command);
+        out.write(val_Command + delim_Space);
 
         //writes the message function
         out.write(function);
@@ -97,7 +97,7 @@ public class G8RRequest extends G8RMessage {
         for(String s : params) {
             out.write(delim_Space + s);
         }
-        out.write(lineEnd);
+        out.write(delim_LineEnd);
 
         //writes out the cookie list
         cookies.encode(out);

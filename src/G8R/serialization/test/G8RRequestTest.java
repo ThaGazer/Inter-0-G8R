@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class G8RRequestTest {
 
     private G8RRequest res;
-    private String message = "G8R/1.0 Q run fcn p1 p2\r\nx=1\r\ny=2\r\n\r\n";
+    private String message = "G8R/1.0 Q RUN fcn p1 p2\r\nx=1\r\ny=2\r\n\r\n";
 
     public G8RRequestTest() throws IOException, ValidationException {
         res = (G8RRequest) G8RMessage.decode(new MessageInput(
