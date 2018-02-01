@@ -54,7 +54,7 @@ public class G8RRequest extends G8RMessage {
         setFunction(in.readUntil(delim_Space));
 
         //reads all params
-        setParams(in.readUntil(delim_LineEnd).split(delim_Space));
+        setParams(in.readUntil(delim_LineEnd).split(delim_LineEnd));
 
         //reads in cookies
         setCookieList(new CookieList(in));

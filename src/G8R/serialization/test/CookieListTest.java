@@ -14,6 +14,9 @@ import G8R.serialization.CookieList;
 import G8R.serialization.MessageInput;
 import G8R.serialization.MessageOutput;
 import G8R.serialization.ValidationException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.io.*;
 import java.util.*;
 
@@ -75,6 +78,14 @@ public class CookieListTest {
         MessageOutput out = new MessageOutput(bOut);
         testCookie.encode(out);
         assertArrayEquals(expByte.getBytes(), bOut.toByteArray());
+    }
+
+    @DisplayName("invalid")
+    @ParameterizedTest
+    @ValueSource(strings = {"a=1\r\nb=\r\n\r\n", "a==1\r\n\r\n", "a1\r\n"})
+    void testEncodeInvalid(String str) {
+        assertThrows(ValidationException.class, ()->new CookieList(
+                new MessageInput(new ByteArrayInputStream(str.getBytes()))));
     }
 
     @Test

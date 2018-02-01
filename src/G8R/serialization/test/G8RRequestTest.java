@@ -10,50 +10,72 @@ package G8R.serialization.test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import G8R.serialization.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Request_method test")
 public class G8RRequestTest {
 
-    private G8RRequest res;
-    private String message = "G8R/1.0 Q RUN fcn p1 p2\r\nx=1\r\ny=2\r\n\r\n";
+    private G8RRequest req;
 
-    public G8RRequestTest() throws IOException, ValidationException {
-        res = (G8RRequest) G8RMessage.decode(new MessageInput(
-                new ByteArrayInputStream(
-                        message.getBytes(StandardCharsets.US_ASCII))));
-    }
+    @DisplayName("valid")
+    @ParameterizedTest
+    @MethodSource("getEncodeParam")
+    public void RequestEncodeTest_valid(String b)
+            throws IOException, ValidationException {
+        req = (G8RRequest)G8RMessage.decode(new MessageInput(
+                new ByteArrayInputStream(b.getBytes())));
 
-    @DisplayName("encode")
-    @Test
-    public void RequestEncodeTest() throws IOException {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         MessageOutput out = new MessageOutput(bout);
-        res.encode(out);
-        assertArrayEquals(message.getBytes(StandardCharsets.US_ASCII),
-                bout.toByteArray());
+        req.encode(out);
+        assertArrayEquals(b.getBytes(), bout.toByteArray());
+    }
+
+    @DisplayName("invalid")
+    @ParameterizedTest
+    @MethodSource("getEncodeInvalid")
+    public void RequestDecodeTest_invalid(String b) {
+        assertThrows(ValidationException.class, ()->G8RMessage.decode(
+                new MessageInput(new ByteArrayInputStream(
+                        b.getBytes(StandardCharsets.US_ASCII)))));
     }
 
     @DisplayName("set function")
     @Test
     public void setFunctionTest_valid() throws ValidationException {
+        req = new G8RRequest();
         String funct = "aFunct";
-        res.setFunction(funct);
-        assertEquals(funct, res.getFunction());
+        req.setFunction(funct);
+        assertEquals(funct, req.getFunction());
     }
 
     @DisplayName("set parameters")
     @Test
     public void setParams_valid() throws ValidationException {
+        req = new G8RRequest();
         String[] params = {"p2, p1"};
-        res.setParams(params);
-        assertEquals(params, res.getParams());
+        req.setParams(params);
+        assertEquals(params, req.getParams());
+    }
+
+    private static Stream<String> getEncodeParam() {
+        return Stream.of("G8R/1.0 Q RUN fcn p1 p2\r\nx=1\r\ny=2\r\n\r\n");
+    }
+
+    private static Stream<String> getEncodeInvalid() {
+        return Stream.of("G8R/1.0 Q run fcn p1 p2\n\r\n",
+                "G8R/2.0 Q RUN fnv p1\r\nx=1\r\n\r\n",
+                "G8R/1.0 q RUN fun p \r\n\r\n",
+                "G8r/1.0 Q RUN fcnp1\r\n\r\n");
     }
 }
