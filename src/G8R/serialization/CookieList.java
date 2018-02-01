@@ -191,14 +191,16 @@ public class CookieList {
     }
 
     @Override
-    public int hashCode() {
-        return cookieList.hashCode();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CookieList that = (CookieList) o;
+        return Objects.equals(cookieList, that.cookieList);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this ||
-                obj instanceof CookieList && cookieList.equals(obj);
+    public int hashCode() {
+        return Objects.hash(cookieList);
     }
 
     /**
