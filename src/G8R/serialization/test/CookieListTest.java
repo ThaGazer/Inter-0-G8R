@@ -15,6 +15,7 @@ import G8R.serialization.MessageInput;
 import G8R.serialization.MessageOutput;
 import G8R.serialization.ValidationException;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.*;
@@ -88,12 +89,23 @@ public class CookieListTest {
                 new MessageInput(new ByteArrayInputStream(str.getBytes()))));
     }
 
-    @Test
-    void testAdd() throws ValidationException {
+    @ParameterizedTest
+    @CsvSource({"a, 1", "sdasffhjklkjhgf, 123456432"})
+    void testAdd(String name, String value) throws ValidationException {
         int oldSize = testCookie.size();
-        testCookie.add("newName", "1");
-        assertEquals(oldSize+1, testCookie.size());
-        assertTrue(testCookie.getValue("newName") != null);
+        testCookie.add(name, value);
+        assertAll("properties", ()-> {
+            assertTrue(oldSize != testCookie.size());
+            assertEquals(value, testCookie.getValue(name));
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource({"n allwed, 1", "a, n allwed", "a, a bc", "a bc, 1",
+            "a, a-c", "a-c, 1", "a, ' '"})
+    void testAddInvalid(String name, String value) throws ValidationException {
+        testCookie.add(name, value);
+        assertEquals(value, testCookie.getValue(name));
     }
 
     @Test

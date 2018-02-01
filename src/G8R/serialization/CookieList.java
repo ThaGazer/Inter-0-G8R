@@ -17,7 +17,8 @@ import java.util.*;
 public class CookieList {
 
     private static final String errNullCookie = "empty cookie object";
-    private static final String errNullMessageOut = "Null MessageOutput object";
+    private static final String errNullMessageOut = "null MessageOutput object";
+    private static final String errNullToken = "null token";
     private static final String errCookieFormat =
             "incorrect serialization of cookie";
 
@@ -94,12 +95,16 @@ public class CookieList {
      * @return value associated with the given name or null if no such name
      */
     public String getValue(String name) {
-        if(name != null && !emptyStr.equals(name)) {
-            for (Cookie c : cookieList) {
-                if (c.getName().equals(name)) {
-                    return c.getValue();
+        if(name != null) {
+            if (!emptyStr.equals(name)) {
+                for (Cookie c : cookieList) {
+                    if (c.getName().equals(name)) {
+                        return c.getValue();
+                    }
                 }
             }
+        } else {
+            throw new NullPointerException(errNullToken);
         }
         return null;
     }
