@@ -15,7 +15,7 @@ public class Cookie implements Comparable<Cookie> {
 
     private static final String emptyStr = "";
     private static final String delim = "=";
-    private static final String alphaNum = "[\\w|\\s|-]+";
+    private static final String alphaNum = "[\\w|\n]+";
 
 
     private String name;
@@ -60,7 +60,7 @@ public class Cookie implements Comparable<Cookie> {
         if(nam.matches(alphaNum)) {
             name = Objects.requireNonNull(nam);
         } else {
-            throw new ValidationException(errEmptyString, name);
+            throw new ValidationException(errEmptyString, nam);
         }
     }
 
@@ -73,7 +73,7 @@ public class Cookie implements Comparable<Cookie> {
         if(val.matches(alphaNum)) {
             value = Objects.requireNonNull(val);
         } else {
-            throw new ValidationException(errEmptyString, value);
+            throw new ValidationException(errEmptyString, val);
         }
     }
 

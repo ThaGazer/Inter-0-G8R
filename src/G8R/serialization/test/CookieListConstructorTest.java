@@ -11,10 +11,14 @@ package G8R.serialization.test;
 import org.junit.jupiter.api.DisplayName;
 import G8R.serialization.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,6 +96,14 @@ class CookieListConstructorTest {
         ByteArrayInputStream bIn = new ByteArrayInputStream(expStr.getBytes());
         MessageInput mIn = new MessageInput(bIn);
         CookieList testCookie = new CookieList(mIn);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"\nx=4\r\n", "x=4\r\n\r\n"})
+    void testCookieListMessageInputInvalid(String str) {
+        assertThrows(ValidationException.class, ()->
+           new CookieList(new MessageInput(new ByteArrayInputStream(
+                   str.getBytes(StandardCharsets.US_ASCII)))));
     }
 
     /**

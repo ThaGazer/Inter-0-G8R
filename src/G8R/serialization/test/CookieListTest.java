@@ -103,9 +103,9 @@ public class CookieListTest {
     @ParameterizedTest
     @CsvSource({"n allwed, 1", "a, n allwed", "a, a bc", "a bc, 1",
             "a, a-c", "a-c, 1", "a, ' '"})
-    void testAddInvalid(String name, String value) throws ValidationException {
-        testCookie.add(name, value);
-        assertEquals(value, testCookie.getValue(name));
+    void testAddInvalid(String name, String value) {
+        assertThrows(ValidationException.class, ()->
+                testCookie.add(name, value));
     }
 
     @Test

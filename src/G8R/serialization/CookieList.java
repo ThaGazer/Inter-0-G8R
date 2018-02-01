@@ -16,9 +16,10 @@ import java.util.*;
  */
 public class CookieList {
 
-    private static final String errNullCookie = "empty cookie object";
+    private static final String errNullCookie = "null cookie object";
     private static final String errNullMessageOut = "null MessageOutput object";
     private static final String errNullToken = "null token";
+    private static final String errNullStream = "null stream";
     private static final String errCookieFormat =
             "incorrect serialization of cookie";
 
@@ -57,6 +58,9 @@ public class CookieList {
         String word;
         if(!in.isNull()) {
             while (!emptyStr.equals(word = in.readUntil(delim_LineEnding))) {
+                if(word == null) {
+                    throw new ValidationException(errNullCookie, "null");
+                }
                 String[] words = word.split(delim_NameValue);
                 if (words.length == 2) {
                     cookieList.add(new Cookie(words[0], words[1]));
@@ -74,6 +78,11 @@ public class CookieList {
      * @throws NullPointerException if in or out is null
      */
     public CookieList(Scanner in, PrintStream out) {
+        if(in == null | out == null) {
+            throw new NullPointerException(errNullStream);
+        }
+
+
     }
 
     /**

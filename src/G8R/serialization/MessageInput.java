@@ -47,12 +47,7 @@ public class MessageInput {
      * @throws IOException if I/O problem
      */
     public int read() throws IOException {
-        int a;
-        if((a = inBuff.read()) != -1) {
-            return a;
-        } else {
-            throw new IOException(errClosedEarly);
-        }
+        return inBuff.read();
     }
 
     /**
@@ -63,7 +58,11 @@ public class MessageInput {
     public String readUntil(String delim) throws IOException {
         String line = "";
         while(!line.contains(delim)) {
-            line += (char)read();
+            int a;
+            if((a = read()) == -1) {
+                return null;
+            }
+            line += (char)a;
         }
         return line.substring(0,(line.length()-delim.length()));
     }
