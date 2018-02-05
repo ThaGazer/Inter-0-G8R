@@ -13,10 +13,9 @@ public class Cookie implements Comparable<Cookie> {
 
     private static final String errEmptyString = "empty string";
 
-    private static final String emptyStr = "";
     private static final String delim = "=";
-    private static final String alphaNum = "[\\w|\n]+";
-
+    private static final String alphaNumMore = "[\\w]+";
+    private static final String alphaNumLess = "[\\w]*";
 
     private String name;
     private String value;
@@ -57,7 +56,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for name
      */
     public void setName(String nam) throws ValidationException {
-        if(nam.matches(alphaNum)) {
+        if(nam.matches(alphaNumMore)) {
             name = Objects.requireNonNull(nam);
         } else {
             throw new ValidationException(errEmptyString, nam);
@@ -70,7 +69,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for value
      */
     public void setValue(String val) throws ValidationException {
-        if(val.matches(alphaNum)) {
+        if(val.matches(alphaNumLess)) {
             value = Objects.requireNonNull(val);
         } else {
             throw new ValidationException(errEmptyString, val);
@@ -92,8 +91,6 @@ public class Cookie implements Comparable<Cookie> {
     public String getValue() {
         return value;
     }
-
-
 
     @Override
     public int compareTo(Cookie o) {

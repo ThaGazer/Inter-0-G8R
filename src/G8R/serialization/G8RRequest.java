@@ -133,7 +133,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null cookie list
      */
     public void setCookieList(CookieList cl) {
-        cookies = Objects.requireNonNull(cl);
+        cookies = cl;
     }
 
     /**

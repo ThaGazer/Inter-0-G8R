@@ -28,7 +28,6 @@ public class CookieList {
     private static final String emptyStr = "";
 
     private Set<Cookie> cookieList = new TreeSet<>();
-    ;
 
     /**
      * Creates a new, empty cookie list
@@ -81,8 +80,6 @@ public class CookieList {
         if(in == null | out == null) {
             throw new NullPointerException(errNullStream);
         }
-
-
     }
 
     /**
@@ -165,6 +162,14 @@ public class CookieList {
     }
 
     /**
+     * add all of a cookie list to the current cookie list
+     * @param cl cookie list to add
+     */
+    public void addall(CookieList cl) {
+        cookieList.addAll(cl.cookieList);
+    }
+
+    /**
      * removes a cookie from the list
      * @param nam name of cookie
      * @return if cookie was successfully removed
@@ -183,7 +188,6 @@ public class CookieList {
      */
     public boolean remove(Cookie c) {
         c = Objects.requireNonNull(c);
-
         return cookieList.remove(c);
     }
 

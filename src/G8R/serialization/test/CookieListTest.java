@@ -101,6 +101,22 @@ public class CookieListTest {
     }
 
     @ParameterizedTest
+    @CsvSource({"a, 1", "b, 1234254365"})
+    void testRemove(String name, String value) throws ValidationException {
+        testCookie.add(name, value);
+        assertTrue(testCookie.remove(name));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"a, 1", "b, 2", "dsafsfg, 123"})
+    void testAddVal(String name, String value) throws ValidationException {
+        String newVal = "newVal";
+        testCookie.add(name, value);
+        testCookie.add(name, newVal);
+        assertEquals(newVal, testCookie.getValue(name));
+    }
+
+    @ParameterizedTest
     @CsvSource({"n allwed, 1", "a, n allwed", "a, a bc", "a bc, 1",
             "a, a-c", "a-c, 1", "a, ' '"})
     void testAddInvalid(String name, String value) {
