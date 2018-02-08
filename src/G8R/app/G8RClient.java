@@ -20,6 +20,8 @@ public class G8RClient {
     private static final String errNumParams =
             "Usage: <server identity> <server port> <cookie file>";
     private static final String errFNF = "file not found";
+    private static final String err_InitMessage =
+            "Failed to create initial message";
 
     private static final String msgConsoleEnding = "> ";
 
@@ -28,10 +30,8 @@ public class G8RClient {
     protected static final String delim_Space = " ";
 
     private static CookieList clientCookie = new CookieList();
-    private static InetAddress sIdent;
-    private static int sPort;
-    private static String cFileName;
-    private static G8RMessage message;
+    private static G8RResponse resMess;
+    private static G8RRequest reqMess;
 
     public static void main(String[] args)
             throws FileNotFoundException, UnknownHostException {
@@ -39,9 +39,9 @@ public class G8RClient {
             throw new IllegalArgumentException(errNumParams);
         }
 
-        sIdent = InetAddress.getByName(args[0]);
-        sPort = Integer.parseInt(args[1]);
-        cFileName = args[2];
+        InetAddress sIdent = InetAddress.getByName(args[0]);
+        int sPort = Integer.parseInt(args[1]);
+        String cFileName = args[2];
         Scanner scn = new Scanner(System.in);
 
         File cfile = new File(cFileName);
@@ -50,11 +50,12 @@ public class G8RClient {
         }
 
         try (Socket soc = new Socket(sIdent, sPort)) {
+
             try {
                 initFunct(scn);
-            } catch (ValidationException e) {
-                System.err.println("Could not set initial function");
-                e.printStackTrace();
+            } catch (ValidationException ve) {
+                ve.printStackTrace(err_InitMessage);
+                return;
             }
 
             boolean clientStop = false;
@@ -64,7 +65,7 @@ public class G8RClient {
                 } catch (ValidationException e) {
                     e.printStackTrace();
                 }
-            } while (!clientStop);
+            } while (!clientStop && !soc.isClosed());
 
             scn.close();
         } catch (IOException e) {
@@ -75,43 +76,46 @@ public class G8RClient {
     private static void initFunct(Scanner scn) throws ValidationException {
         System.out.println("Function" + msgConsoleEnding);
         String funct = scn.nextLine();
-        System.out.println("Parameters" + msgConsoleEnding);
-        String[] param = scn.nextLine().split(delim_Space);
-        message = new G8RRequest(funct, param, null);
+        reqMess = new G8RRequest(funct, new String[]{""}, null);
     }
 
     private static boolean clientOp(Socket soc)
             throws ValidationException, IOException {
-        MessageInput in = new MessageInput(soc.getInputStream());
-        MessageOutput out = new MessageOutput(soc.getOutputStream());
 
         //send message to server
-        message.encode(out);
+        reqMess.encode(new MessageOutput(soc.getOutputStream()));
 
-        //receives message from server
-        message = G8RMessage.decode(in);
-
-        //saves all cookies sent from server
-        clientCookie.addall(((G8RResponse)message).getCookieList());
-
-        //prints out message from server
-        switch(((G8RResponse)message).getStatus()) {
-            case valStatOK:
-                System.out.println(((G8RResponse)message).getMessage());
-                break;
-            case valStatERROR:
-                System.err.println(((G8RResponse)message).getMessage());
-                break;
-        }
+        receiveFromServer(new MessageInput(soc.getInputStream()));
 
         //terminates client if function from server was null
-        if(((G8RResponse)message).getFunction() == null) {
+        if(resMess.getFunction() == null) {
             return true;
         }
 
         //prompt for response to server
 
 
+
         return false;
+    }
+
+    private static G8RMessage receiveFromServer(MessageInput in)
+            throws IOException, ValidationException {
+        //receives message from server
+        resMess = (G8RResponse)G8RMessage.decode(in);
+
+        //saves all cookies sent from server
+        clientCookie.addall(reqMess.getCookieList());
+
+        //prints out message from server
+        switch(resMess.getStatus()) {
+            case valStatOK:
+                System.out.println(resMess.getMessage());
+                break;
+            case valStatERROR:
+                System.err.println(resMess.getMessage());
+                break;
+        }
+        return resMess;
     }
 }

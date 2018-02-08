@@ -28,14 +28,14 @@ public class ValidationException extends Exception implements Serializable {
 
     /**
      * Constructs validation exception
-     * @param mess exception
-     * @param tok token causing validation failure
-     * @param caus exception cause
+     * @param message exception message
+     * @param token token causing validation failure
+     * @param cause exception cause
      * @throws NullPointerException if null parameters
      */
-    public ValidationException(String mess, String tok, Throwable caus) {
-        super(mess, caus);
-        setToken(tok);
+    public ValidationException(String message, String token, Throwable cause) {
+        super(message, cause);
+        setToken(token);
     }
 
     /**
@@ -57,6 +57,11 @@ public class ValidationException extends Exception implements Serializable {
 
     public void printStackTrace() {
         System.err.println(getToken());
+        super.printStackTrace();
+    }
+
+    public void printStackTrace(String str) {
+        System.err.println(str + ": " + getToken());
         super.printStackTrace();
     }
 }

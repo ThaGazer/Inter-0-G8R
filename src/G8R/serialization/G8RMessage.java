@@ -13,7 +13,7 @@ import java.io.IOException;
  * Represents generic portion of a G8R message and provides
  * serialization/deserialization.
  */
-public class G8RMessage {
+public abstract class G8RMessage {
 
     protected static final String errNullMessageOut =
             "Null MessageOutput object";
