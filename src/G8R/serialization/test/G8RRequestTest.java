@@ -69,7 +69,7 @@ public class G8RRequestTest {
     }
 
     private static Stream<String> getEncodeParam() {
-        return Stream.of("G8R/1.0 Q RUN fcn p1 p2\r\nx=1\r\ny=2\r\n\r\n");
+        return Stream.of("G8R/1.0 Q RUN Poll\r\n\r\n");
     }
 
     private static Stream<String> getEncodeInvalid() {

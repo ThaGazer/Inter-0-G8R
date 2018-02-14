@@ -8,7 +8,9 @@
 package G8R.serialization;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,18 +45,25 @@ public class G8RRequest extends G8RMessage {
             throw new NullPointerException(errNullMessageIn);
         }
 
-        //what does this command do?
-        String tmpCommand;
-        if(!val_Command.equals(tmpCommand =
-                in.readUntil(delim_Space))) {
-            throw new ValidationException(errCommand, tmpCommand);
+        String[] req = in.readUntil(delim_LineEnd).split(delim_Space);
+
+        List<String> params = new ArrayList<>();
+        for(int i = 0; i < req.length; i++) {
+            switch(i) {
+                case 0:
+                    if(!val_Command.equals(req[i])) {
+                        throw new ValidationException(errCommand, req[i]);
+                    }
+                    break;
+                case 1:
+                    setFunction(req[i]);
+                    break;
+                default:
+                    params.add(req[i]);
+            }
         }
 
-        //reads function
-        setFunction(in.readUntil(delim_Space));
-
-        //reads all params
-        setParams(in.readUntil(delim_LineEnd).split(delim_LineEnd));
+        setParams(params.toArray(new String[0]));
 
         //reads in cookies
         setCookieList(new CookieList(in));
@@ -94,8 +103,10 @@ public class G8RRequest extends G8RMessage {
         out.write(function);
 
         //writes out all parameters
-        for(String s : params) {
-            out.write(delim_Space + s);
+        if(getParams() != null) {
+            for (String s : params) {
+                out.write(delim_Space + s);
+            }
         }
         out.write(delim_LineEnd);
 
@@ -133,7 +144,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null cookie list
      */
     public void setCookieList(CookieList cl) {
-        cookies = cl;
+        cookies = Objects.requireNonNull(cl);
     }
 
     /**
@@ -153,7 +164,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null array or array elements
      */
     public void setParams(String[] para) throws ValidationException {
-        params = Objects.requireNonNull(para);
+        params = para;
     }
 
     /**

@@ -10,9 +10,7 @@ package G8R.app;
 import G8R.serialization.*;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Scanner;
 
 public class G8RClient {
@@ -46,6 +44,9 @@ public class G8RClient {
 
 
         try (Socket soc = new Socket(sIdent, sPort)) {
+            MessageInput in = new MessageInput(soc.getInputStream());
+            MessageOutput out = new MessageOutput(soc.getOutputStream());
+
             //initialize cookies
             try {
                 readInCookie(cFileName);
@@ -53,27 +54,27 @@ public class G8RClient {
                 ve.printStackTrace(errReadingCookie);
             }
 
-            //reading initial function from user
-            try {
-                initFunct(soc, scn);
-            } catch (ValidationException ve) {
-                ve.printStackTrace(errInitMessage);
-                return;
-            }
-
             //sending and receiving from server
-            boolean clientStop = false;
-            do {
+            boolean reset = true;
+            while (!soc.isClosed()) {
                 try {
-                    clientStop = clientOp(soc, scn);
+                    if(reset) {
+                        initFunct(out, scn);
+                    }
+
+                    reset = clientOp(in, out, scn);
+
+                    if(reset) {
+                        soc.close();
+                    }
                 } catch (ValidationException e) {
                     e.printStackTrace();
                 }
-            } while (!clientStop && !soc.isClosed());
+            }
 
             writeOutCookie(cFileName);
             scn.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             writeOutCookie(cFileName);
             e.printStackTrace();
         }
@@ -81,46 +82,48 @@ public class G8RClient {
 
     private static void readInCookie(String fileName)
             throws IOException, ValidationException {
-        if(new File(fileName).exists()) {
-            clientCookie = new CookieList(new MessageInput(
-                    new BufferedInputStream(new FileInputStream(fileName))));
+        File file = new File(fileName);
+        if(file.exists()) {
+            if(file.length() > 0) {
+                clientCookie = new CookieList(new MessageInput(
+                        new BufferedInputStream(new FileInputStream(fileName))));
+            }
         }
     }
 
     private static void writeOutCookie(String fileName) {
         try {
-            clientCookie.encode(new MessageOutput(
-                    new BufferedOutputStream(new FileOutputStream(fileName))));
+            clientCookie.encode(new MessageOutput(new FileOutputStream(fileName)));
         } catch(IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void initFunct(Socket soc, Scanner scn)
+    private static void initFunct(MessageOutput out, Scanner scn)
             throws ValidationException, IOException {
-        System.out.println("Function" + msgConsoleEnding);
+        System.out.print("Function" + msgConsoleEnding);
         String funct = scn.nextLine();
-        reqMess = new G8RRequest(funct, new String[]{""}, clientCookie);
+        reqMess = new G8RRequest(funct, null, clientCookie);
 
         //send message to server
-        reqMess.encode(new MessageOutput(soc.getOutputStream()));
+        reqMess.encode(out);
     }
 
-    private static boolean clientOp(Socket soc, Scanner scn)
+    private static boolean clientOp(MessageInput in, MessageOutput out,
+                                    Scanner scn)
             throws ValidationException, IOException {
 
         //read response from server
-        receiveFromServer(new MessageInput(soc.getInputStream()));
+        receiveFromServer(in);
 
         //terminates client if function from server was null
-        if(resMess.getFunction() == null) {
+        if(resMess.getFunction().equals("NULL")) {
+            System.out.println();
             return true;
         }
 
         //prompt for request to server
-        sendToServer(new MessageOutput(soc.getOutputStream()), scn);
-
-
+        sendToServer(out, scn);
         return false;
     }
 
@@ -130,12 +133,12 @@ public class G8RClient {
         resMess = (G8RResponse)G8RMessage.decode(in);
 
         //saves all cookies sent from server
-        clientCookie.addall(reqMess.getCookieList());
+        clientCookie.addAll(resMess.getCookieList());
 
         //prints out message from server
         switch(resMess.getStatus()) {
             case valStatOK:
-                System.out.println(resMess.getMessage());
+                System.out.print(resMess.getMessage());
                 break;
             case valStatERROR:
                 System.err.println(resMess.getMessage());
@@ -150,6 +153,9 @@ public class G8RClient {
 
         //reads the request of the user to the servers response
         reqMess.setParams(scn.nextLine().split(delim_Space));
+
+        //set cookies
+        reqMess.setCookieList(clientCookie);
 
         //sends request to server
         reqMess.encode(out);

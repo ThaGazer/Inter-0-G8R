@@ -27,12 +27,13 @@ public class CookieList {
     private static final String delim_NameValue = "=";
     private static final String emptyStr = "";
 
-    private Set<Cookie> cookieList = new TreeSet<>();
+    private Set<Cookie> cookieList;
 
     /**
      * Creates a new, empty cookie list
      */
     public CookieList() {
+        cookieList = new TreeSet<>();
     }
 
     /**
@@ -40,7 +41,13 @@ public class CookieList {
      * @param cl list of cookies to clone
      */
     public CookieList(CookieList cl) {
-        cookieList.addAll(cl.cookieList);
+        if(cookieList == null) {
+            cookieList = new TreeSet<>();
+        }
+
+        for(Cookie c : cl.cookieList) {
+            add(c);
+        }
     }
 
     /**
@@ -54,6 +61,7 @@ public class CookieList {
     public CookieList(MessageInput in)
             throws ValidationException, IOException {
 
+        cookieList = new TreeSet<>();
         String word;
         if(!in.isNull()) {
             while (!emptyStr.equals(word = in.readUntil(delim_LineEnding))) {
@@ -162,13 +170,17 @@ public class CookieList {
     }
 
     /**
-     * add all of a cookie list to the current cookie list
+     * adds all of one cookie list to the other.
+     * if a cookie already exist then its value will be updated
      * @param cl cookie list to add
+     * @throws NullPointerException if cookie list is null
      */
-    public void addall(CookieList cl) {
-        cookieList.addAll(cl.cookieList);
+    public void addAll(CookieList cl) {
+        cl = Objects.requireNonNull(cl);
+        for(Cookie c : cl.cookieList) {
+            add(c);
+        }
     }
-
     /**
      * removes a cookie from the list
      * @param nam name of cookie

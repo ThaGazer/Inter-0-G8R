@@ -15,9 +15,9 @@ import java.io.InputStream;
  */
 public class MessageInput {
 
-    private static final String errClosedEarly = "connection closed early";
     private static final String errNullStream = "null input stream";
 
+    private final String delim_LineEnd = "\r\n";
 
     private InputStream inBuff;
 
@@ -57,13 +57,16 @@ public class MessageInput {
      */
     public String readUntil(String delim) throws IOException {
         String line = "";
-        while(!line.contains(delim)) {
+        while(!line.endsWith(delim)) {
+            if(line.endsWith(delim_LineEnd)) {
+                return line.substring(0, line.length()-delim_LineEnd.length());
+            }
             int a;
             if((a = read()) == -1) {
                 return null;
             }
             line += (char)a;
         }
-        return line.substring(0,(line.length()-delim.length()));
+        return line.substring(0, (line.length()-delim.length()));
     }
 }
