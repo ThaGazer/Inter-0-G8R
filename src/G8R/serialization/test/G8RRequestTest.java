@@ -101,7 +101,7 @@ public class G8RRequestTest {
     @Test
     public void setParams_valid() throws ValidationException {
         req = new G8RRequest();
-        String[] params = {"p2, p1"};
+        String[] params = {"p2", "p1"};
         req.setParams(params);
         assertEquals(params, req.getParams());
     }

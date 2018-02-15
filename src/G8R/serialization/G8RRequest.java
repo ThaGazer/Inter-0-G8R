@@ -64,6 +64,8 @@ public class G8RRequest extends G8RMessage {
 
         if(!params.isEmpty()) {
             setParams(params.toArray(new String[0]));
+        } else {
+            setParams(new String[]{});
         }
 
         //reads in cookies
@@ -131,7 +133,7 @@ public class G8RRequest extends G8RMessage {
      */
     public void setParams(String[] para) throws ValidationException {
         for (String s : para) {
-            if (s.matches(alphaNumMore)) {
+            if (!s.matches(alphaNumMore)) {
                 throw new ValidationException(errParameter, s);
             }
         }

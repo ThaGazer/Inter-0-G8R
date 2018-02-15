@@ -189,7 +189,7 @@ public class CookieList {
      * @throws NullPointerException if name is null
      */
     public boolean remove(String nam) throws ValidationException {
-        return remove(new Cookie(nam, ""));
+        return remove(new Cookie(nam,"a"));
     }
 
     /**
