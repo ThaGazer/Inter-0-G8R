@@ -18,7 +18,9 @@ import java.util.Objects;
  */
 public class G8RRequest extends G8RMessage {
 
-    private static final String errCommand = "incorrect command parameter";
+    private static final String errCommand = "not a command";
+    private static final String errFunction = "not a recognized function";
+    private static final String errParameter = "improper parameter format";
 
     private static final String val_Command = "RUN";
     private static final String val_Type = "Q";
@@ -63,7 +65,9 @@ public class G8RRequest extends G8RMessage {
             }
         }
 
-        setParams(params.toArray(new String[0]));
+        if(!params.isEmpty()) {
+            setParams(params.toArray(new String[0]));
+        }
 
         //reads in cookies
         setCookieList(new CookieList(in));
@@ -154,6 +158,9 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null command
      */
     public void setFunction(String funct) throws ValidationException {
+        if(funct.isEmpty()) {
+            throw new ValidationException(errFunction, funct);
+        }
         function = Objects.requireNonNull(funct);
     }
 
@@ -164,7 +171,12 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null array or array elements
      */
     public void setParams(String[] para) throws ValidationException {
-        params = para;
+        for (String s : para) {
+            if (s.isEmpty()) {
+                throw new ValidationException(errParameter, s);
+            }
+        }
+        params = Objects.requireNonNull(para);
     }
 
     /**

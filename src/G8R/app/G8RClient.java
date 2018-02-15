@@ -18,8 +18,6 @@ public class G8RClient {
     private static final String errNumParams =
             "Usage: <server identity> <server port> <cookie file>";
     private static final String errReadingCookie = "Failed read cookies";
-    private static final String errInitMessage =
-            "Failed to create initial message";
 
     private static final String msgConsoleEnding = "> ";
 
@@ -55,20 +53,19 @@ public class G8RClient {
             }
 
             //sending and receiving from server
-            boolean reset = true;
+            try {
+                initFunct(out, scn);
+            } catch (ValidationException | IOException e) {
+                System.err.println(e.getMessage());
+            }
+
             while (!soc.isClosed()) {
                 try {
-                    if(reset) {
-                        initFunct(out, scn);
-                    }
-
-                    reset = clientOp(in, out, scn);
-
-                    if(reset) {
+                    if(clientOp(in, out, scn)) {
                         soc.close();
                     }
-                } catch (ValidationException e) {
-                    e.printStackTrace();
+                } catch (ValidationException | NullPointerException e) {
+                    System.err.println(e.getMessage());
                 }
             }
 
@@ -86,14 +83,16 @@ public class G8RClient {
         if(file.exists()) {
             if(file.length() > 0) {
                 clientCookie = new CookieList(new MessageInput(
-                        new BufferedInputStream(new FileInputStream(fileName))));
+                        new BufferedInputStream(
+                                new FileInputStream(fileName))));
             }
         }
     }
 
     private static void writeOutCookie(String fileName) {
         try {
-            clientCookie.encode(new MessageOutput(new FileOutputStream(fileName)));
+            clientCookie.encode(
+                    new MessageOutput(new FileOutputStream(fileName)));
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -103,7 +102,7 @@ public class G8RClient {
             throws ValidationException, IOException {
         System.out.print("Function" + msgConsoleEnding);
         String funct = scn.nextLine();
-        reqMess = new G8RRequest(funct, null, clientCookie);
+        reqMess = new G8RRequest(funct, new String[]{}, clientCookie);
 
         //send message to server
         reqMess.encode(out);
