@@ -19,15 +19,12 @@ import java.util.Objects;
 public class G8RRequest extends G8RMessage {
 
     private static final String errCommand = "not a command";
-    private static final String errFunction = "not a recognized function";
     private static final String errParameter = "improper parameter format";
 
     private static final String val_Command = "RUN";
     private static final String val_Type = "Q";
 
-    private String function;
     private String[] params;
-    private CookieList cookies;
 
     /**
      * creates an empty G8R request
@@ -119,49 +116,11 @@ public class G8RRequest extends G8RMessage {
     }
 
     /**
-     * retrun message cookie list
-     * @return cookie list
-     */
-    public CookieList getCookieList() {
-        return cookies;
-    }
-
-    /**
-     * returns function
-     * @return function
-     */
-    public String getFunction() {
-        return function;
-    }
-
-    /**
      * returns parameters
      * @return parameters
      */
     public String[] getParams() {
         return params;
-    }
-
-    /**
-     * set cookie list
-     * @param cl cookie list
-     * @throws NullPointerException if null cookie list
-     */
-    public void setCookieList(CookieList cl) {
-        cookies = Objects.requireNonNull(cl);
-    }
-
-    /**
-     * set function
-     * @param funct new function
-     * @throws ValidationException if invalid command
-     * @throws NullPointerException if null command
-     */
-    public void setFunction(String funct) throws ValidationException {
-        if(funct.isEmpty()) {
-            throw new ValidationException(errFunction, funct);
-        }
-        function = Objects.requireNonNull(funct);
     }
 
     /**
@@ -172,11 +131,28 @@ public class G8RRequest extends G8RMessage {
      */
     public void setParams(String[] para) throws ValidationException {
         for (String s : para) {
-            if (s.isEmpty()) {
+            if (s.matches(alphaNumMore)) {
                 throw new ValidationException(errParameter, s);
             }
         }
         params = Objects.requireNonNull(para);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        G8RRequest that = (G8RRequest) o;
+        return Objects.equals(getFunction(), that.getFunction()) &&
+                Arrays.equals(getParams(), that.getParams()) &&
+                Objects.equals(cookies, that.cookies);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getFunction(), cookies);
+        result = 31 * result + Arrays.hashCode(getParams());
+        return result;
     }
 
     /**

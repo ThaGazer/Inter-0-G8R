@@ -15,7 +15,6 @@ public class Cookie implements Comparable<Cookie> {
 
     private static final String delim = "=";
     private static final String alphaNumMore = "[\\w]+";
-    private static final String alphaNumLess = "[\\w]*";
 
     private String name;
     private String value;
@@ -69,7 +68,7 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for value
      */
     public void setValue(String val) throws ValidationException {
-        if(val.matches(alphaNumLess)) {
+        if(val.matches(alphaNumMore)) {
             value = Objects.requireNonNull(val);
         } else {
             throw new ValidationException(errEmptyString, val);

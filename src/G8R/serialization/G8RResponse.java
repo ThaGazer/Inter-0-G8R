@@ -12,8 +12,6 @@ import java.util.Objects;
 
 public class G8RResponse extends G8RMessage {
 
-    private static final String errNullCL = "null cookie list";
-    private static final String errNullFunct = "null function";
     private static final String errNullMessage = "null message";
     private static final String errStatus = "not an G8RResponse status";
 
@@ -22,9 +20,7 @@ public class G8RResponse extends G8RMessage {
     private static final String type_ERROR = "ERROR";
 
     private String status;
-    private String function;
     private String message;
-    private CookieList cookieList;
 
     /**
      * creates an empty G8RResponse message
@@ -97,21 +93,6 @@ public class G8RResponse extends G8RMessage {
         getCookieList().encode(out);
     }
 
-    /**
-     * return cookie list
-     * @return cookie list
-     */
-    public CookieList getCookieList() {
-        return cookieList;
-    }
-
-    /**
-     * return function
-     * @return function
-     */
-    public String getFunction() {
-        return function;
-    }
 
     /**
      * return message
@@ -127,25 +108,6 @@ public class G8RResponse extends G8RMessage {
      */
     public String getStatus() {
         return status;
-    }
-
-    /**
-     * set cookie list
-     * @param cl cookie list
-     * @throws NullPointerException if null cookie list
-     */
-    public void setCookieList(CookieList cl) {
-        cookieList = Objects.requireNonNull(cl, errNullCL);
-    }
-
-    /**
-     * set function
-     * @param funct mew function
-     * @throws ValidationException if invalid command
-     * @throws NullPointerException if null command
-     */
-    public void setFunction(String funct) throws ValidationException {
-        function = Objects.requireNonNull(funct, errNullFunct);
     }
 
     /**
@@ -171,8 +133,25 @@ public class G8RResponse extends G8RMessage {
         status = Objects.requireNonNull(stat);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        G8RResponse that = (G8RResponse) o;
+        return Objects.equals(getStatus(), that.getStatus()) &&
+                Objects.equals(getFunction(), that.getFunction()) &&
+                Objects.equals(getMessage(), that.getMessage()) &&
+                Objects.equals(getCookieList(), that.getCookieList());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getStatus(), getFunction(),
+                getMessage(), getCookieList());
+    }
+
     /**
-     * retruns human-readable string repressentation of G8R response message
+     * retruns human-readable string representation of G8R response message
      * @return string representation
      */
     public String toString() {

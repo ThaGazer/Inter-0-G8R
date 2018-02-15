@@ -230,7 +230,7 @@ public class CookieList {
 
     @Override
     public int hashCode() {
-        return Objects.hash(cookieList);
+        return cookieList.hashCode();
     }
 
     /**
