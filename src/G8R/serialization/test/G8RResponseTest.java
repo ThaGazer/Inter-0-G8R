@@ -29,22 +29,38 @@ public class G8RResponseTest {
 
     @DisplayName("encode valid")
     @ParameterizedTest
-    @MethodSource("getEncodeParam")
+    @MethodSource("getValid")
     public void ResponseEncodeTest(String b)
             throws IOException, ValidationException {
         res = (G8RResponse)G8RMessage.decode(new MessageInput(new
                 ByteArrayInputStream(b.getBytes(StandardCharsets.US_ASCII))));
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        MessageOutput out = new MessageOutput(bout);
-        res.encode(out);
+        res.encode(new MessageOutput(bout));
+        assertArrayEquals(b.getBytes(StandardCharsets.US_ASCII),
+                bout.toByteArray());
+    }
+
+    @DisplayName("encode double valid")
+    @ParameterizedTest
+    @MethodSource("getValid")
+    public void ResponseDoubleEncodeTest(String b)
+            throws IOException, ValidationException {
+        String db = b + b;
+        MessageInput in = new MessageInput(new
+                ByteArrayInputStream(db.getBytes(StandardCharsets.US_ASCII)));
+        res = (G8RResponse)G8RMessage.decode(in);
+        res = (G8RResponse)G8RMessage.decode(in);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        res.encode(new MessageOutput(bout));
         assertArrayEquals(b.getBytes(StandardCharsets.US_ASCII),
                 bout.toByteArray());
     }
 
     @DisplayName("encode invalid")
     @ParameterizedTest
-    @MethodSource("getEncodeInvalid")
+    @MethodSource("getInvalid")
     public void ResponseEncodeInvalid(String b) {
         assertThrows(ValidationException.class, ()->G8RMessage.decode(
                 new MessageInput(new ByteArrayInputStream(
@@ -78,12 +94,15 @@ public class G8RResponseTest {
         assertEquals(str, res.getStatus());
     }
 
-    private static Stream<String> getEncodeParam() {
+    private static Stream<String> getValid() {
         return Stream.of(
-                "G8R/1.0 R OK func thie is a good message\r\nx=1\r\n\r\n");
+                "G8R/1.0 R OK func this is a good message\r\nx=1\r\n\r\n",
+                "G8R/1.0 R OK F1\r\n\r\n",
+                "G8R/1.0 R OK F1 one\r\none=1\r\n\r\n",
+                "G8R/1.0 R OK F1\r\n\r\n");
     }
 
-    private static Stream<String> getEncodeInvalid() {
+    private static Stream<String> getInvalid() {
         return Stream.of("G8r/1.0 R OK func thisisamessage\r\n",
                 "G8R/1.0 R error func message\r\n", " R OK fun this\r\n");
     }

@@ -111,7 +111,7 @@ public abstract class G8RMessage {
      * @throws NullPointerException if null cookie list
      */
     public void setCookieList(CookieList cl) {
-        cookies = Objects.requireNonNull(cl, errNullCL);
+        cookies = new CookieList(Objects.requireNonNull(cl, errNullCL));
     }
 
     public String toString() {

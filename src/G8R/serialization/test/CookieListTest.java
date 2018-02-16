@@ -9,11 +9,9 @@
 package G8R.serialization.test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import G8R.serialization.*;
 import org.junit.jupiter.api.*;
-import G8R.serialization.CookieList;
-import G8R.serialization.MessageInput;
-import G8R.serialization.MessageOutput;
-import G8R.serialization.ValidationException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -163,6 +161,17 @@ public class CookieListTest {
             });
     }
 
+    @Test
+    public void TestHash() throws ValidationException {
+        CookieList c1 = new CookieList();
+        c1.add("x", "1");
+        c1.add("y", "g46");
+
+        CookieList c2 = new CookieList(c1);
+        c2.add("y", "g45");
+        c1.hashCode();
+        c2.hashCode();
+    }
     @Test
     void testToString() {
         assertEquals(expStr, testCookie.toString());

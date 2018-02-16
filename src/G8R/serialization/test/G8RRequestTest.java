@@ -35,7 +35,7 @@ public class G8RRequestTest {
     @Nested
     public class constructorTest {
 
-        @DisplayName("attribute invalid")
+        @DisplayName("invalid attribute")
         @Test
         public void testAttributeConstrInvalid() throws ValidationException {
             assertThrows(ValidationException.class, ()-> {
@@ -44,7 +44,7 @@ public class G8RRequestTest {
             });
         }
 
-        @DisplayName("attribute valid")
+        @DisplayName("valid attribute")
         @Test
         public void testAttributeConstrValid() throws ValidationException {
             req = new G8RRequest("F1", new String[]{"P1"},
@@ -52,9 +52,9 @@ public class G8RRequestTest {
         }
     }
 
-    @DisplayName("valid")
+    @DisplayName("valid encode")
     @ParameterizedTest
-    @MethodSource("getEncodeParam")
+    @MethodSource("getValid")
     public void RequestEncodeTest_valid(String b)
             throws IOException, ValidationException {
         req = (G8RRequest)G8RMessage.decode(new MessageInput(
@@ -66,18 +66,18 @@ public class G8RRequestTest {
         assertArrayEquals(b.getBytes(), bout.toByteArray());
     }
 
-    @DisplayName("invalid")
+    @DisplayName("invalid decode")
     @ParameterizedTest
-    @MethodSource("getDecodeInvalid")
+    @MethodSource("getInvalid")
     public void RequestDecodeTest_invalid(String b) {
         assertThrows(ValidationException.class, ()->G8RMessage.decode(
                 new MessageInput(new ByteArrayInputStream(
                         b.getBytes(StandardCharsets.US_ASCII)))));
     }
 
-    @DisplayName("valid")
+    @DisplayName("valid decode")
     @ParameterizedTest
-    @MethodSource("getDecodeValid")
+    @MethodSource("getValid")
     public void RequestDecodeTest_valid(String b)
             throws IOException, ValidationException {
         req = (G8RRequest)G8RMessage.decode(new MessageInput(
@@ -103,14 +103,10 @@ public class G8RRequestTest {
         req = new G8RRequest();
         String[] params = {"p2", "p1"};
         req.setParams(params);
-        assertEquals(params, req.getParams());
+        assertArrayEquals(params, req.getParams());
     }
 
-    private static Stream<String> getEncodeParam() {
-        return Stream.of("G8R/1.0 Q RUN Poll\r\n\r\n");
-    }
-
-    private static Stream<String> getDecodeInvalid() {
+    private static Stream<String> getInvalid() {
         return Stream.of("G8R/1.0 Q run fcn p1 p2\n\r\n",
                 "G8R/2.0 Q RUN fnv p1\r\nx=1\r\n\r\n",
                 "G8R/1.0 q RUN fun p \r\n\r\n",
@@ -118,9 +114,10 @@ public class G8RRequestTest {
                 "G8R/1.0 Q RuN fcnp1\r\n\r\n");
     }
 
-    private static Stream<String> getDecodeValid() {
-        return Stream.of("G8R/1.0 Q RUN f1\r\n\r\n",
-                "G8R/1.0 Q RUN f1 p1\r\n\r\n",
-                "G8R/1.0 Q RUN f1 p1 p2\r\nx=1\r\ny=2\r\nz=3\r\n\r\n");
+    private static Stream<String> getValid() {
+        return Stream.of("G8R/1.0 Q RUN f1\r\n\r\nx=1\r\n\r\n",
+                "G8R/1.0 Q RUN f1 p1\r\nx=1\r\n\r\n",
+                "G8R/1.0 Q RUN f1 p1 p2\r\nx=1\r\n" +
+                        "y=2\r\nz=3\r\na=1\r\ns=12\r\n\r\n");
     }
 }

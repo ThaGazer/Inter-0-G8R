@@ -122,7 +122,7 @@ public class G8RRequest extends G8RMessage {
      * @return parameters
      */
     public String[] getParams() {
-        return params;
+        return Arrays.copyOf(params, params.length);
     }
 
     /**
@@ -132,12 +132,13 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null array or array elements
      */
     public void setParams(String[] para) throws ValidationException {
+        Objects.requireNonNull(para);
         for (String s : para) {
             if (!s.matches(alphaNumMore)) {
                 throw new ValidationException(errParameter, s);
             }
         }
-        params = Objects.requireNonNull(para);
+        params = Arrays.copyOf(para, para.length);
     }
 
     @Override

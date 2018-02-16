@@ -70,7 +70,7 @@ public class CookieList {
                 }
                 String[] words = word.split(delim_NameValue);
                 if (words.length == 2) {
-                    cookieList.add(new Cookie(words[0], words[1]));
+                    add(new Cookie(words[0], words[1]));
                 } else {
                     throw new ValidationException(errCookieFormat, word);
                 }
@@ -230,6 +230,7 @@ public class CookieList {
 
     @Override
     public int hashCode() {
+        System.out.println(cookieList + " " + cookieList.hashCode());
         return cookieList.hashCode();
     }
 

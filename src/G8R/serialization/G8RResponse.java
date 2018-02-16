@@ -13,11 +13,14 @@ import java.util.Objects;
 public class G8RResponse extends G8RMessage {
 
     private static final String errNullMessage = "null message";
+    private static final String errMessage = "not an G8RResponse message";
     private static final String errStatus = "not an G8RResponse status";
 
     private static final String val_Type = "R";
     private static final String type_OK = "OK";
     private static final String type_ERROR = "ERROR";
+
+    private static final String alphaNumSpLess = "[\\w\\d\\s()<>:]*";
 
     private String status;
     private String message;
@@ -34,14 +37,27 @@ public class G8RResponse extends G8RMessage {
             throw new NullPointerException(errNullMessageIn);
         }
 
-        //reads in status
-        setStatus(in.readUntil(delim_Space));
+        String[] res = in.readUntil(delim_LineEnd).split(delim_Space);
 
-        //reads in function
-        setFunction(in.readUntil(delim_Space));
-
-        //reads in message
-        setMessage(in.readUntil(delim_LineEnd));
+        String message = "";
+        for(int i = 0; i < res.length; i++) {
+            switch(i) {
+                case 0:
+                    setStatus(res[i]);
+                    break;
+                case 1:
+                    setFunction(res[i]);
+                    break;
+                default:
+                    message += res[i] + " ";
+                    break;
+            }
+        }
+        if(message.isEmpty()) {
+            setMessage(message);
+        } else {
+            setMessage(message.substring(0, message.length() - 1));
+        }
 
         //reads in cookielist
         setCookieList(new CookieList(in));
@@ -84,12 +100,16 @@ public class G8RResponse extends G8RMessage {
         out.write(getStatus() + delim_Space);
 
         //writes out message function
-        out.write(getFunction() + delim_Space);
+        if(!getMessage().isEmpty()) {
+            out.write(getFunction() + delim_Space);
 
-        //writes out messages' message
-        out.write(getMessage() + delim_LineEnd);
+            //writes out messages' message
+            out.write(getMessage() + delim_LineEnd);
+        } else {
+            out.write(getFunction() + delim_LineEnd);
+        }
 
-        //writes out messages' cookielist
+        //writes out message's cookieList
         getCookieList().encode(out);
     }
 
@@ -117,6 +137,9 @@ public class G8RResponse extends G8RMessage {
      * @throws NullPointerException if null message
      */
     public void setMessage(String mess) throws ValidationException {
+        if(!mess.matches(alphaNumSpLess)) {
+            throw new ValidationException(errMessage, mess);
+        }
         message = Objects.requireNonNull(mess, errNullMessage);
     }
 

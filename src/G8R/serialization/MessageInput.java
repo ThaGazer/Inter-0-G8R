@@ -7,6 +7,7 @@
  */
 package G8R.serialization;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -63,7 +64,7 @@ public class MessageInput {
             }
             int a;
             if((a = read()) == -1) {
-                return null;
+                throw new EOFException();
             }
             line += (char)a;
         }

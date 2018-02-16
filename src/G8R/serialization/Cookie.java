@@ -29,7 +29,7 @@ public class Cookie implements Comparable<Cookie> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName());
+        return getName().hashCode();
     }
 
     /**
@@ -68,11 +68,10 @@ public class Cookie implements Comparable<Cookie> {
      * @throws ValidationException if validation error for value
      */
     public void setValue(String val) throws ValidationException {
-        if(val.matches(alphaNumMore)) {
-            value = Objects.requireNonNull(val);
-        } else {
+        if(!val.matches(alphaNumMore)) {
             throw new ValidationException(errEmptyString, val);
         }
+        value = Objects.requireNonNull(val);
     }
 
     /**

@@ -8,20 +8,24 @@
  */
 package G8R.serialization.test;
 
+import com.sun.tracing.dtrace.ProviderAttributes;
 import org.junit.jupiter.api.DisplayName;
 import G8R.serialization.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @DisplayName("CookieList_Constructor test")
@@ -99,7 +103,7 @@ class CookieListConstructorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"\nx=4\r\n", "x=4\r\n\r\n"})
+    @MethodSource("getInvalid")
     void testCookieListMessageInputInvalid(String str) {
         assertThrows(ValidationException.class, ()->
            new CookieList(new MessageInput(new ByteArrayInputStream(
@@ -128,5 +132,45 @@ class CookieListConstructorTest {
             MessageInput in = null;
             CookieList cookie = new CookieList(in);
         });
+    }
+
+    @DisplayName("empty cookie")
+    @ParameterizedTest
+    @MethodSource("getValid")
+    public void testEmptyCookie(String list)
+            throws IOException, ValidationException {
+        CookieList cl = new CookieList(new MessageInput(
+                new ByteArrayInputStream(list.getBytes(
+                        StandardCharsets.US_ASCII))));
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        cl.encode(new MessageOutput(bout));
+        assertArrayEquals(list.getBytes(), bout.toByteArray());
+    }
+
+    @DisplayName("multiEncode")
+    @ParameterizedTest
+    @MethodSource("getinvalid")
+    public void testCokie(String str) {
+        assertThrows(ValidationException.class, () -> {
+            MessageInput in = new MessageInput(new ByteArrayInputStream(str.getBytes(StandardCharsets.US_ASCII)));
+            new CookieList(in);
+            new CookieList(in);
+            new CookieList(in);
+        });
+    }
+
+    private static Stream getValid() {
+        return Stream.of("\r\nx=1\r\n\r\n", "x=1\r\n\r\n",
+                "x=1\r\ny=1\r\nx=2\r\n\r\n", "x=1\r\n\r\n\r\n", "\r\n");
+    }
+
+    private static Stream getinvalid() {
+        return Stream.of("x=1\r\n\r\n\r\n");
+    }
+
+    private static Stream getInvalid() {
+        return Stream.of("", "x=1\r\n", "x==1\r\n\r\n", "x\r\n\r\n",
+                "x=1y=2\r\n");
     }
 }
