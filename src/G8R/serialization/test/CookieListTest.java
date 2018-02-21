@@ -169,9 +169,9 @@ public class CookieListTest {
 
         CookieList c2 = new CookieList(c1);
         c2.add("y", "g45");
-        c1.hashCode();
-        c2.hashCode();
+        assertTrue(c1.hashCode() != c2.hashCode());
     }
+
     @Test
     void testToString() {
         assertEquals(expStr, testCookie.toString());

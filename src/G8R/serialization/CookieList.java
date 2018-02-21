@@ -230,8 +230,11 @@ public class CookieList {
 
     @Override
     public int hashCode() {
-        System.out.println(cookieList + " " + cookieList.hashCode());
-        return cookieList.hashCode();
+        int hash = 0;
+        for(Cookie c : cookieList) {
+            hash = c.hashCode();
+        }
+        return hash;
     }
 
     /**

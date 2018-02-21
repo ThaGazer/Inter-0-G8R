@@ -97,13 +97,14 @@ public class G8RResponseTest {
     private static Stream<String> getValid() {
         return Stream.of(
                 "G8R/1.0 R OK func this is a good message\r\nx=1\r\n\r\n",
-                "G8R/1.0 R OK F1\r\n\r\n",
                 "G8R/1.0 R OK F1 one\r\none=1\r\n\r\n",
-                "G8R/1.0 R OK F1\r\n\r\n");
+                "G8R/1.0 R OK F1 \r\n\r\n", "G8R/1.0 R ERROR F1 \r\n\r\n",
+                "G8R/1.0 R OK F1  \r\n\r\n", "G8R/1.0 R ERROR F1  \r\n\r\n",
+                "G8R/1.0 R OK F1 one\r\n\r\n");
     }
 
     private static Stream<String> getInvalid() {
-        return Stream.of("G8r/1.0 R OK func thisisamessage\r\n",
+        return Stream.of("G8r/1.0 R OK func this is a message\r\n",
                 "G8R/1.0 R error func message\r\n", " R OK fun this\r\n");
     }
 }

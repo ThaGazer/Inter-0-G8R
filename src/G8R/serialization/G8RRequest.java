@@ -20,6 +20,7 @@ public class G8RRequest extends G8RMessage {
 
     private static final String errCommand = "not a command";
     private static final String errParameter = "improper parameter format";
+    private static final String errNullParam = "null parameter";
 
     private static final String val_Command = "RUN";
     private static final String val_Type = "Q";
@@ -93,6 +94,10 @@ public class G8RRequest extends G8RMessage {
      * @throws IOException if write issues
      */
     public void encode(MessageOutput out) throws IOException {
+        if(out.isNull()) {
+            throw new NullPointerException(errNullMessageOut);
+        }
+
         //writes header
         super.encode(out);
 
@@ -132,7 +137,7 @@ public class G8RRequest extends G8RMessage {
      * @throws NullPointerException if null array or array elements
      */
     public void setParams(String[] para) throws ValidationException {
-        Objects.requireNonNull(para);
+        Objects.requireNonNull(para, errNullParam);
         for (String s : para) {
             if (!s.matches(alphaNumMore)) {
                 throw new ValidationException(errParameter, s);

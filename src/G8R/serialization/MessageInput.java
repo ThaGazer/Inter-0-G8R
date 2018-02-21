@@ -52,6 +52,15 @@ public class MessageInput {
     }
 
     /**
+     * reads all bytes in the stream until it finds the end of line deliminator
+     * @return the string representation of the bytes read minus the deliminator
+     * @throws IOException if I/O problems
+     */
+    public String readUntil() throws IOException {
+        return readUntil(delim_LineEnd);
+    }
+
+    /**
      * reads all bytes in the stream until it finds the deliminator.
      * @return the string representation of the bytes read minus the deliminator
      * @throws IOException if I/O problems

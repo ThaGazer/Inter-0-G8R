@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -152,7 +153,7 @@ class CookieListConstructorTest {
     @ParameterizedTest
     @MethodSource("getinvalid")
     public void testCokie(String str) {
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(EOFException.class, () -> {
             MessageInput in = new MessageInput(new ByteArrayInputStream(str.getBytes(StandardCharsets.US_ASCII)));
             new CookieList(in);
             new CookieList(in);
@@ -161,16 +162,15 @@ class CookieListConstructorTest {
     }
 
     private static Stream getValid() {
-        return Stream.of("\r\nx=1\r\n\r\n", "x=1\r\n\r\n",
-                "x=1\r\ny=1\r\nx=2\r\n\r\n", "x=1\r\n\r\n\r\n", "\r\n");
+        return Stream.of("x=1\r\n\r\n", "x=1\r\ny=1\r\nz=2\r\n\r\n", "\r\n");
     }
 
     private static Stream getinvalid() {
-        return Stream.of("x=1\r\n\r\n\r\n");
+        return Stream.of("x=1\r\n\r\n\r\n", "\r\nx=1\r\n\r\n");
     }
 
     private static Stream getInvalid() {
-        return Stream.of("", "x=1\r\n", "x==1\r\n\r\n", "x\r\n\r\n",
+        return Stream.of(" =1\r\n", "x=\r\n", "x==1\r\n\r\n", "x\r\n\r\n",
                 "x=1y=2\r\n");
     }
 }

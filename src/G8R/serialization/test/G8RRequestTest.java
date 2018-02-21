@@ -75,19 +75,6 @@ public class G8RRequestTest {
                         b.getBytes(StandardCharsets.US_ASCII)))));
     }
 
-    @DisplayName("valid decode")
-    @ParameterizedTest
-    @MethodSource("getValid")
-    public void RequestDecodeTest_valid(String b)
-            throws IOException, ValidationException {
-        req = (G8RRequest)G8RMessage.decode(new MessageInput(
-                new ByteArrayInputStream(
-                        b.getBytes(StandardCharsets.US_ASCII))));
-        ByteArrayOutputStream encoder = new ByteArrayOutputStream();
-        req.encode(new MessageOutput(encoder));
-        assertEquals(b, new String(encoder.toByteArray()));
-    }
-
     @DisplayName("set function")
     @Test
     public void setFunctionTest_valid() throws ValidationException {
@@ -115,9 +102,9 @@ public class G8RRequestTest {
     }
 
     private static Stream<String> getValid() {
-        return Stream.of("G8R/1.0 Q RUN f1\r\n\r\nx=1\r\n\r\n",
+        return Stream.of("G8R/1.0 Q RUN f1\r\nx=1\r\n\r\n",
                 "G8R/1.0 Q RUN f1 p1\r\nx=1\r\n\r\n",
-                "G8R/1.0 Q RUN f1 p1 p2\r\nx=1\r\n" +
-                        "y=2\r\nz=3\r\na=1\r\ns=12\r\n\r\n");
+                "G8R/1.0 Q RUN f1 p1 p2\r\na=1\r\nb=2\r\nc=3\r\nd=1\r\ne=12\r\n\r\n",
+                "G8R/1.0 Q RUN f1\r\n\r\n");
     }
 }

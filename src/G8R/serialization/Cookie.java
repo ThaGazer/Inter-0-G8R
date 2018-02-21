@@ -19,18 +19,6 @@ public class Cookie implements Comparable<Cookie> {
     private String name;
     private String value;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Cookie cookie = (Cookie) o;
-        return Objects.equals(getName(), cookie.getName());
-    }
-
-    @Override
-    public int hashCode() {
-        return getName().hashCode();
-    }
 
     /**
      * Creates an empty Cookie object
@@ -88,6 +76,19 @@ public class Cookie implements Comparable<Cookie> {
      */
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cookie cookie = (Cookie) o;
+        return Objects.equals(getName(), cookie.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode() + getValue().hashCode();
     }
 
     @Override

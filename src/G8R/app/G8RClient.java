@@ -26,11 +26,9 @@ public class G8RClient {
     private static final String delim_Space = " ";
 
     private static CookieList clientCookie = new CookieList();
-    private static G8RResponse resMess;
-    private static G8RRequest reqMess;
+    private static G8RMessage message;
 
-    public static void main(String[] args)
-            throws UnknownHostException {
+    public static void main(String[] args) throws IOException {
         if(args.length != 3) {
             throw new IllegalArgumentException(errNumParams);
         }
@@ -63,8 +61,10 @@ public class G8RClient {
                 try {
                     if(clientOp(in, out, scn)) {
                         soc.close();
+                    } else {
+                        writeOutCookie(cFileName);
                     }
-                } catch (ValidationException | NullPointerException e) {
+                } catch (ValidationException e) {
                     System.err.println(e.getMessage());
                 }
             }
@@ -72,7 +72,6 @@ public class G8RClient {
             writeOutCookie(cFileName);
             scn.close();
         } catch (Exception e) {
-            writeOutCookie(cFileName);
             e.printStackTrace();
         }
     }
@@ -89,23 +88,20 @@ public class G8RClient {
         }
     }
 
-    private static void writeOutCookie(String fileName) {
-        try {
-            clientCookie.encode(
-                    new MessageOutput(new FileOutputStream(fileName)));
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
+    private static void writeOutCookie(String fileName)
+            throws IOException {
+        clientCookie.encode(
+                new MessageOutput(new FileOutputStream(fileName)));
     }
 
     private static void initFunct(MessageOutput out, Scanner scn)
             throws ValidationException, IOException {
         System.out.print("Function" + msgConsoleEnding);
         String funct = scn.nextLine();
-        reqMess = new G8RRequest(funct, new String[]{}, clientCookie);
+        message = new G8RRequest(funct, new String[]{}, clientCookie);
 
         //send message to server
-        reqMess.encode(out);
+        message.encode(out);
     }
 
     private static boolean clientOp(MessageInput in, MessageOutput out,
@@ -116,7 +112,7 @@ public class G8RClient {
         receiveFromServer(in);
 
         //terminates client if function from server was null
-        if(resMess.getFunction().equals("NULL")) {
+        if(message.getFunction().equals("NULL")) {
             System.out.println();
             return true;
         }
@@ -128,35 +124,36 @@ public class G8RClient {
 
     private static void receiveFromServer(MessageInput in)
             throws IOException, ValidationException {
-        //receives message from server
-        resMess = (G8RResponse)G8RMessage.decode(in);
+
+        //decodes message from server
+        message = G8RMessage.decode(in);
+        G8RResponse res = (G8RResponse)message;
 
         //saves all cookies sent from server
-        clientCookie.addAll(resMess.getCookieList());
+        clientCookie.addAll(message.getCookieList());
 
         //prints out message from server
-        switch(resMess.getStatus()) {
+        switch(res.getStatus()) {
             case valStatOK:
-                System.out.print(resMess.getMessage());
+                System.out.print(res.getMessage());
                 break;
             case valStatERROR:
-                System.err.println(resMess.getMessage());
+                System.err.println(res.getMessage());
                 break;
         }
     }
 
     private static void sendToServer(MessageOutput out, Scanner scn)
             throws ValidationException, IOException {
-        //sets the request function to the function of the response
-        reqMess.setFunction(resMess.getFunction());
 
         //reads the request of the user to the servers response
-        reqMess.setParams(scn.nextLine().split(delim_Space));
+        String[] parameters = scn.nextLine().split(delim_Space);
 
-        //set cookies
-        reqMess.setCookieList(clientCookie);
+        //initialize a request message from a known message
+        G8RRequest req = new G8RRequest
+                (message.getFunction(), parameters, clientCookie);
 
         //sends request to server
-        reqMess.encode(out);
+        req.encode(out);
     }
 }
