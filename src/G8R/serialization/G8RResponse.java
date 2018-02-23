@@ -17,8 +17,8 @@ public class G8RResponse extends G8RMessage {
     private static final String errStatus = "not a G8RResponse status";
 
     private static final String val_Type = "R";
-    private static final String type_OK = "OK";
-    private static final String type_ERROR = "ERROR";
+    public static final String type_OK = "OK";
+    public static final String type_ERROR = "ERROR";
 
     private static final String allAscii = "[ -~]*";
 

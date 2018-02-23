@@ -5,7 +5,7 @@
  * Author:
  *   -Justin Ritter
  */
-package G8R.app;
+package G8R.app.test;
 
 
 import G8R.serialization.*;
@@ -16,13 +16,26 @@ import java.net.Socket;
 import java.util.Objects;
 
 public class G8REchoServer {
+
+    private static final String usage = "Usage: <server port>";
+    private static final String serverStatus = "Server running on: ";
+
     public static void main(String[] argv) {
-        int servPort = argv.length == 1 ? Integer.parseInt(argv[0]) : 7;
+        if(argv.length != 1) {
+            throw new IllegalArgumentException(usage);
+        }
+        int servPort = Integer.parseInt(argv[0]);
 
         try (ServerSocket servSock = new ServerSocket(servPort)) {
+            System.out.println(serverStatus + servSock.getLocalSocketAddress());
+
             while(true) {
-                Thread t = new Handler(servSock.accept());
-                t.start();
+                try {
+                    Thread t = new Handler(servSock.accept());
+                    t.start();
+                } catch(Exception e) {
+                    System.err.println(e.getMessage());
+                }
             }
         } catch(IOException ioe) {
             ioe.printStackTrace();
