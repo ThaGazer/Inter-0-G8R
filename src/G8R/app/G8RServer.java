@@ -7,28 +7,32 @@
  */
 package G8R.app;
 
-import G8R.serialization.G8RMessage;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
 
 public class G8RServer {
 
+    //private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGGERNAME = G8RServer.class.getName();
-    private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGGERFILE = "./logs/server.log";
 
     private static final String errParams =
             "Usage: <server port> <thread count>";
     private static final String errCrash = "Server crashed";
 
+    private static final String msgServerStart = "Server started on port: ";
+
     private static Logger logger = null;
 
+    /**
+     * sends and receives messages from multiple clients
+     * @param argv arguments to passed to server
+     * @throws IOException if I/O problem
+     */
     public static void main(String[] argv) throws IOException {
         if(argv.length != 2) {
             throw new IllegalArgumentException(errParams);
@@ -43,6 +47,7 @@ public class G8RServer {
         setup_logger();
 
         try(ServerSocket server = new ServerSocket(servPort)) {
+            logger.info(msgServerStart + server.getLocalPort());
             while(true) {
                 pool.execute(new G8RClientHandler(server.accept()));
             }
@@ -52,6 +57,10 @@ public class G8RServer {
 
     }
 
+    /**
+     * sets up the logger for the server
+     * @throws IOException if I/O problem
+     */
     private static void setup_logger() throws IOException {
         LogManager manager = LogManager.getLogManager();
         manager.reset();
@@ -67,7 +76,7 @@ public class G8RServer {
         Handler consoleHand = new ConsoleHandler();
 
         fileHand.setLevel(Level.ALL);
-        consoleHand.setLevel(Level.SEVERE);
+        consoleHand.setLevel(Level.INFO);
 
         //sets the formatting style of the logs
         fileHand.setFormatter(new SimpleFormatter());

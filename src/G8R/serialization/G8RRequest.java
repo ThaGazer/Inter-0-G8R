@@ -140,7 +140,8 @@ public class G8RRequest extends G8RMessage {
         Objects.requireNonNull(para, errNullParam);
         for (String s : para) {
             if (!s.matches(alphaNumMore)) {
-                throw new ValidationException(errParameter, s);
+                throw new ValidationException(errParameter,
+                        Arrays.toString(para));
             }
         }
         params = Arrays.copyOf(para, para.length);

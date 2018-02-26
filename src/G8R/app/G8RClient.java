@@ -8,6 +8,7 @@
 package G8R.app;
 
 import G8R.serialization.*;
+import com.sun.istack.internal.NotNull;
 
 import java.io.*;
 import java.net.*;
@@ -70,7 +71,7 @@ public class G8RClient {
 
             writeOutCookie(cFileName);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -117,9 +118,9 @@ public class G8RClient {
 
         //prompt for request to server
         while(!sendToServer(out, scn)) {
+            System.err.flush();
             printResponse(message);
         }
-
         return false;
     }
 
@@ -136,9 +137,15 @@ public class G8RClient {
         printResponse(message);
     }
 
-    private static boolean sendToServer(MessageOutput out, Scanner scn)
+    /**
+     * reads information from user and sends it to the server
+     * @param out output stream to server
+     * @param scn to read user input
+     * @return true if successful send or false if unable to create message
+     * @throws IOException if I/O problems
+     */
+    private static boolean sendToServer(MessageOutput out, @NotNull Scanner scn)
             throws IOException {
-
         //reads the request of the user to the servers response
         String[] parameters = scn.nextLine().split(delim_Space);
 
@@ -165,7 +172,7 @@ public class G8RClient {
                 System.out.print(res.getMessage());
                 break;
             case valStatERROR:
-                System.err.println(res.getMessage());
+                System.err.print(res.getMessage());
                 break;
         }
     }
