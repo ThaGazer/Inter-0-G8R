@@ -23,8 +23,9 @@ public class G8RServer {
     private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGGERFILE = "./logs/server.log";
 
-
-    private static String errParams = "Usage: <server port> <thread count>";
+    private static final String errParams =
+            "Usage: <server port> <thread count>";
+    private static final String errCrash = "Server crashed";
 
     private static Logger logger = null;
 
@@ -46,7 +47,7 @@ public class G8RServer {
                 pool.execute(new G8RClientHandler(server.accept()));
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "something happened to the server", e);
+            logger.log(Level.SEVERE, errCrash, e);
         }
 
     }

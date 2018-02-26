@@ -7,8 +7,40 @@
  */
 package G8R.app.FunctionState;
 
+import G8R.serialization.CookieList;
+
+import java.util.Set;
+
 public enum G8RPoll {
-    POLL("Poll"), NAMESTEP("NameStep"), FOODMOOD("FoodMood");
+    POLL("Poll") {
+        @Override
+        public G8RPoll next(CookieList cl) {
+            Set<String> cookieNames = cl.getNames();
+            if(cookieNames.contains(fname) && cookieNames.contains(lname)) {
+                return FOODMOOD;
+            } else {
+                return NAMESTEP;
+            }
+        }
+    }, NAMESTEP("NameStep") {
+        @Override
+        public G8RPoll next(CookieList cl) {
+            return FOODMOOD;
+        }
+    }, FOODMOOD("FoodMood") {
+        @Override
+        public G8RPoll next(CookieList cl) {
+            return NULL;
+        }
+    }, NULL("NULL") {
+        @Override
+        public G8RPoll next(CookieList cl) {
+            return NULL;
+        }
+    };
+
+    private static final String fname = "FName";
+    private static final String lname = "LName";
 
     private String name;
 
@@ -20,15 +52,17 @@ public enum G8RPoll {
         return name;
     }
 
+    public abstract G8RPoll next(CookieList cl);
+
     public static G8RPoll getByName(String function) {
-        if(G8RPoll.POLL.getName().equals(function)) {
+        if(POLL.getName().equals(function)) {
             return POLL;
-        } else if(G8RPoll.NAMESTEP.getName().equals(function)) {
+        } else if(NAMESTEP.getName().equals(function)) {
             return NAMESTEP;
-        } else if(G8RPoll.FOODMOOD.getName().equals(function)) {
+        } else if(FOODMOOD.getName().equals(function)) {
             return FOODMOOD;
         } else {
-            return null;
+            return NULL;
         }
     }
 }

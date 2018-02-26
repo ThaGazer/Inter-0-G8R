@@ -55,14 +55,13 @@ public class G8RClient {
                 initFunct(out, scn);
             } catch (ValidationException | IOException e) {
                 System.err.println(e.getMessage());
+                soc.close();
             }
 
             while (!soc.isClosed()) {
                 try {
                     if(clientOp(in, out, scn)) {
                         soc.close();
-                    } else {
-                        writeOutCookie(cFileName);
                     }
                 } catch (ValidationException e) {
                     System.err.println(e.getMessage());
@@ -70,7 +69,6 @@ public class G8RClient {
             }
 
             writeOutCookie(cFileName);
-            scn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,7 +116,10 @@ public class G8RClient {
         }
 
         //prompt for request to server
-        sendToServer(out, scn);
+        while(!sendToServer(out, scn)) {
+            printResponse(message);
+        }
+
         return false;
     }
 
@@ -127,12 +128,38 @@ public class G8RClient {
 
         //decodes message from server
         message = G8RMessage.decode(in);
-        G8RResponse res = (G8RResponse)message;
 
         //saves all cookies sent from server
         clientCookie.addAll(message.getCookieList());
 
         //prints out message from server
+        printResponse(message);
+    }
+
+    private static boolean sendToServer(MessageOutput out, Scanner scn)
+            throws IOException {
+
+        //reads the request of the user to the servers response
+        String[] parameters = scn.nextLine().split(delim_Space);
+
+        //initialize a request message from a known message
+        try {
+            G8RRequest req = new G8RRequest
+                    (message.getFunction(), parameters, clientCookie);
+
+            //sends request to server
+            req.encode(out);
+        } catch(ValidationException ve) {
+            System.err.println(ve.getReason());
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void printResponse(G8RMessage message) {
+        G8RResponse res = (G8RResponse)message;
+
         switch(res.getStatus()) {
             case valStatOK:
                 System.out.print(res.getMessage());
@@ -141,19 +168,5 @@ public class G8RClient {
                 System.err.println(res.getMessage());
                 break;
         }
-    }
-
-    private static void sendToServer(MessageOutput out, Scanner scn)
-            throws ValidationException, IOException {
-
-        //reads the request of the user to the servers response
-        String[] parameters = scn.nextLine().split(delim_Space);
-
-        //initialize a request message from a known message
-        G8RRequest req = new G8RRequest
-                (message.getFunction(), parameters, clientCookie);
-
-        //sends request to server
-        req.encode(out);
     }
 }
