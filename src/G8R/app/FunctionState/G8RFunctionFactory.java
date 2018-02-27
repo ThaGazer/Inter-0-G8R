@@ -12,8 +12,8 @@ public class G8RFunctionFactory {
         if(G8RPoll.POLL.getName().equals(name)) {
             return G8RPoll.POLL;
         }
-        else if(G8RMathTeacher.MATH.getName().equals(name)) {
-            return G8RMathTeacher.MATH;
+        else if(G8RCalculator.MATH.getName().equals(name)) {
+            return G8RCalculator.MATH;
         } else {
             return null;
         }

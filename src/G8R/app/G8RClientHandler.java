@@ -47,12 +47,21 @@ public class G8RClientHandler implements Runnable {
             MessageInput in = new MessageInput(client.getInputStream());
             MessageOutput out = new MessageOutput(client.getOutputStream());
 
-            G8RResponse res = (G8RResponse)G8RMessage.decode(in);
-            while(G8RFunctionFactory.getByName(res.getFunction()) != null) {
-                res = handleRequest(G8RMessage.decode(in));
+            G8RRequest res = (G8RRequest)G8RMessage.decode(in);
+            Enum e = G8RFunctionFactory.getByName(res.getFunction());
 
-                res.encode(out);
-                logger.log(Level.INFO, msgSendMessage, res);
+            if(e != null) {
+                while (e != ((G8RFunction)e).last()) {
+                    e = handleRequest(res, e, out);
+
+                    if(e != ((G8RFunction)e).last()) {
+                        res = (G8RRequest) G8RMessage.decode(in);
+                    }
+                }
+            } else {
+                logger.log(Level.WARNING, errFunction, res);
+                new G8RResponse(G8RResponse.type_ERROR, "NULL", errFunction,
+                        res.getCookieList()).encode(out);
             }
 
             client.close();
@@ -73,22 +82,22 @@ public class G8RClientHandler implements Runnable {
     /**
      * handler of the state received from client
      * @param clientMess the message from the client
-     * @return the response to the client
-     * @throws ValidationException if message validation error
+     * @param function function state from the client
+     * @param out output sink
      */
-    private G8RResponse handleRequest(G8RMessage clientMess)
-            throws ValidationException {
+    private Enum<?> handleRequest
+    (G8RMessage clientMess, Enum function, MessageOutput out)
+            throws ValidationException, IOException {
         logger.log(Level.INFO, msgRecivMessage, clientMess);
-        CookieList clientCookies = clientMess.getCookieList();
         G8RRequest clientRequest = (G8RRequest) clientMess;
 
-        Enum e = G8RFunctionFactory.getByName(clientRequest.getFunction());
-        if(e == null) {
-            return new G8RResponse(
-                    G8RResponse.type_ERROR, "NULL", errFunction, clientCookies);
+        if(!clientRequest.getFunction().equals(
+                ((G8RFunction) function).getName())) {
+            new G8RResponse(G8RResponse.type_ERROR, "NULL", errFunction,
+                    clientMess.getCookieList()).encode(out);
+            return ((G8RFunction) function).last();
         } else {
-            return ((G8RFunction)e).next(clientRequest);
+            return ((G8RFunction) function).next(clientRequest, out);
         }
-
     }
 }

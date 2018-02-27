@@ -8,9 +8,24 @@
 package G8R.app.FunctionState;
 
 import G8R.serialization.G8RRequest;
-import G8R.serialization.G8RResponse;
+import G8R.serialization.MessageOutput;
 import G8R.serialization.ValidationException;
 
+import java.io.IOException;
+
 public interface G8RFunction {
-    G8RResponse next(G8RRequest request) throws ValidationException;
+    default Enum<?> first() {
+        return null;
+    }
+
+    default Enum<?> last() {
+        return null;
+    }
+
+    default String getName() {
+        return "";
+    }
+
+    Enum<?> next(G8RRequest request, MessageOutput out)
+            throws ValidationException, IOException;
 }

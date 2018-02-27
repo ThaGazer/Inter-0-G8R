@@ -25,6 +25,7 @@ public class G8RServer {
     private static final String errCrash = "Server crashed";
 
     private static final String msgServerStart = "Server started on port: ";
+    private static final String msgServerEnd = "Server closed on port: ";
 
     private static Logger logger = null;
 
@@ -53,6 +54,8 @@ public class G8RServer {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, errCrash, e);
+        } finally {
+            logger.log(Level.INFO, msgServerEnd);
         }
 
     }
@@ -79,7 +82,6 @@ public class G8RServer {
         consoleHand.setLevel(Level.INFO);
 
         //sets the formatting style of the logs
-        fileHand.setFormatter(new SimpleFormatter());
         consoleHand.setFormatter(new SimpleFormatter());
 
         logger.addHandler(fileHand);
