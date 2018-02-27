@@ -14,25 +14,25 @@ import java.util.Set;
 public enum G8RPoll implements G8RFunction {
     POLL("Poll") {
         @Override
-        public G8RPoll next(G8RRequest request, MessageOutput out)
+        public G8RPoll next(G8RMessage request, MessageOutput out)
                 throws ValidationException, IOException {
             return state_Poll(request, out);
         }
     }, NAMESTEP("NameStep") {
         @Override
-        public G8RPoll next(G8RRequest request, MessageOutput out)
+        public G8RPoll next(G8RMessage request, MessageOutput out)
                 throws ValidationException, IOException {
             return state_NameStep(request, out);
         }
     }, FOODMOOD("FoodMood") {
         @Override
-        public G8RPoll next(G8RRequest request, MessageOutput out)
+        public G8RPoll next(G8RMessage request, MessageOutput out)
                 throws ValidationException, IOException {
             return state_FoodMood(request, out);
         }
     }, NULL("NULL") {
         @Override
-        public G8RPoll next(G8RRequest request, MessageOutput out) {
+        public G8RPoll next(G8RMessage request, MessageOutput out) {
             return NULL;
         }
     };
@@ -75,63 +75,72 @@ public enum G8RPoll implements G8RFunction {
      * @throws ValidationException if response validation error
      * @throws IOException if I/O problem
      */
-    protected G8RPoll state_Poll(G8RRequest request, MessageOutput out)
+    protected G8RPoll state_Poll(G8RMessage request, MessageOutput out)
             throws ValidationException, IOException {
         G8RPoll state;
-        String message;
+        String messageToClient;
 
         Set<String> cookieNames = request.getCookieList().getNames();
         if(cookieNames.contains(cookie_fName) &&
                 cookieNames.contains(cookie_fName)) {
             state = FOODMOOD;
-            message = buildFoodMood(request.getCookieList());
+            messageToClient = buildFoodMood(request.getCookieList());
         } else {
             state = NAMESTEP;
-            message = msgNameStep;
+            messageToClient = msgNameStep;
         }
 
-        buildOkResponse(state.getName(), message,
-                request.getCookieList()).encode(out);
+        request = buildOkResponse(state.getName(), messageToClient,
+                request.getCookieList());
+        request.encode(out);
         return state;
     }
 
     /**
      * handles the name step state
-     * @param request a request message
+     * @param message a request message
      * @param out output sink
      * @return a response message to client
      * @throws ValidationException if response validation error
      */
-    protected G8RPoll state_NameStep(G8RRequest request, MessageOutput out)
+    protected G8RPoll state_NameStep(G8RMessage message, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest request = (G8RRequest)message;
+
         if(request.getParams().length != 2) {
-            buildErrResponse(NAMESTEP.getName(), errName + msgNameStep,
-                    request.getCookieList()).encode(out);
+            message = buildErrResponse(NAMESTEP.getName(),
+                    errName + msgNameStep,
+                    request.getCookieList());
+            message.encode(out);
             return NAMESTEP;
         }
         request.getCookieList().add(cookie_fName, request.getParams()[0]);
         request.getCookieList().add(cookie_lName, request.getParams()[1]);
 
-        buildOkResponse(FOODMOOD.getName(),
+        message = buildOkResponse(FOODMOOD.getName(),
                 buildFoodMood(request.getCookieList()),
-                request.getCookieList()).encode(out);
+                request.getCookieList());
+        message.encode(out);
         return FOODMOOD;
     }
 
     /**
      * handles the food mood state
-     * @param request a request message
+     * @param message a request message
      * @param out output sink
      * @return a response message to client
      * @throws ValidationException if response validation error
      * @throws IOException if I/O problem
      */
-    protected G8RPoll state_FoodMood(G8RRequest request, MessageOutput out)
+    protected G8RPoll state_FoodMood(G8RMessage message, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest request = (G8RRequest)message;
+
         if(request.getParams().length != 1) {
-            buildErrResponse(FOODMOOD.getName(),
+            message = buildErrResponse(FOODMOOD.getName(),
                     errMood + buildFoodMood(request.getCookieList()),
-                    request.getCookieList()).encode(out);
+                    request.getCookieList());
+            message.encode(out);
             return FOODMOOD;
         }
 
@@ -142,8 +151,10 @@ public enum G8RPoll implements G8RFunction {
         request.getCookieList().add(cookie_repeat, addToCookie(cookie_repeat,
                 request.getCookieList()));
 
-        buildOkResponse(NULL.getName(), buildDiscount(request.getCookieList()),
-                request.getCookieList()).encode(out);
+        message = buildOkResponse(NULL.getName(),
+                buildDiscount(request.getCookieList()),
+                request.getCookieList());
+        message.encode(out);
         return NULL;
     }
 

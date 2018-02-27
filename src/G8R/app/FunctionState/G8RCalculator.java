@@ -15,43 +15,43 @@ import java.io.IOException;
 public enum G8RCalculator implements G8RFunction {
     MATH("Math") {
         @Override
-        public G8RCalculator next(G8RRequest req, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Math(req, out);
         }
     },FUNCT("Operator") {
         @Override
-        public G8RCalculator next(G8RRequest req, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Funct(req, out);
         }
     }, ADD("add") {
         @Override
-        public G8RCalculator next(G8RRequest req, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Add(req, out);
         }
     }, SUBTRACT("subtract") {
         @Override
-        public G8RCalculator next(G8RRequest req, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Subtract(req, out);
         }
     }, MULTIPLY("multiply") {
         @Override
-        public G8RCalculator next(G8RRequest req, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Multiply(req, out);
         }
     }, EXIT("fin") {
         @Override
-        public G8RCalculator next(G8RRequest request, MessageOutput out)
+        public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws ValidationException, IOException {
-            return state_Exit(request, out);
+            return state_Exit(req, out);
         }
     }, NULL("NULL") {
         @Override
-        public G8RCalculator next(G8RRequest request, MessageOutput out) {
+        public G8RCalculator next(G8RMessage request, MessageOutput out) {
             return NULL;
         }
     };
@@ -93,20 +93,24 @@ public enum G8RCalculator implements G8RFunction {
         return name;
     }
 
-    protected G8RCalculator state_Math(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Math(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
-        req.getCookieList().add(cookie_Sum, "0");
+        mess.getCookieList().add(cookie_Sum, "0");
 
-        buildOkResponse(FUNCT.getName(), msgWhich + msgFunction,
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(FUNCT.getName(), msgWhich + msgFunction,
+                mess.getCookieList());
+        mess.encode(out);
         return FUNCT;
     }
 
-    protected G8RCalculator state_Funct(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Funct(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest req = (G8RRequest)mess;
+
         if(req.getParams().length != 1) {
-            buildErrResponse(FUNCT.getName(), errFunct + msgWhich + msgFunction,
-                    req.getCookieList()).encode(out);
+            mess = buildErrResponse(FUNCT.getName(),
+                    errFunct + msgWhich + msgFunction, req.getCookieList());
+            mess.encode(out);
             return FUNCT;
         }
 
@@ -126,21 +130,26 @@ public enum G8RCalculator implements G8RFunction {
             return state_Exit(req, out);
         } else {
             message = errUnexpectedFunction + msgWhich + msgFunction;
-            buildErrResponse(FUNCT.getName(), message,
-                    req.getCookieList()).encode(out);
+            mess = buildErrResponse(FUNCT.getName(), message,
+                    mess.getCookieList());
+            mess.encode(out);
             return FUNCT;
         }
 
-        buildOkResponse(state.getName(), message,
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(state.getName(), message,
+                req.getCookieList());
+        mess.encode(out);
         return state;
     }
 
-    protected G8RCalculator state_Add(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Add(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest req = (G8RRequest)mess;
+
         if(req.getParams().length < 1) {
-            buildErrResponse(ADD.getName(), errAdd + msgEnterNum + msgAdd,
-                    req.getCookieList()).encode(out);
+            mess = buildErrResponse(ADD.getName(), errAdd + msgEnterNum + msgAdd,
+                    req.getCookieList());
+            mess.encode(out);
             return ADD;
         }
 
@@ -150,23 +159,28 @@ public enum G8RCalculator implements G8RFunction {
                         getValue(cookie_Sum)) + Integer.parseInt(s);
                 req.getCookieList().add(cookie_Sum, String.valueOf(result));
             } catch(NumberFormatException nfe) {
-                buildErrResponse(ADD.getName(),
+                mess = buildErrResponse(ADD.getName(),
                         errNumberFormat + msgEnterNum + msgAdd,
-                        req.getCookieList()).encode(out);
+                        req.getCookieList());
+                mess.encode(out);
                 return ADD;
             }
         }
 
-        buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
+                req.getCookieList());
+        mess.encode(out);
         return FUNCT;
     }
 
-    protected G8RCalculator state_Subtract(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Subtract(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest req = (G8RRequest)mess;
+
         if(req.getParams().length < 1) {
-            buildErrResponse(SUBTRACT.getName(), errSub + msgEnterNum + msgSub,
-                    req.getCookieList()).encode(out);
+            mess = buildErrResponse(SUBTRACT.getName(), errSub + msgEnterNum + msgSub,
+                    req.getCookieList());
+            mess.encode(out);
             return SUBTRACT;
         }
 
@@ -176,23 +190,28 @@ public enum G8RCalculator implements G8RFunction {
                         getValue(cookie_Sum)) - Integer.parseInt(s);
                 req.getCookieList().add(cookie_Sum, String.valueOf(result));
             } catch(NumberFormatException nfe) {
-                buildErrResponse(SUBTRACT.getName(),
+                mess = buildErrResponse(SUBTRACT.getName(),
                         errNumberFormat + msgEnterNum + msgSub,
-                        req.getCookieList()).encode(out);
+                        req.getCookieList());
+                mess.encode(out);
                 return SUBTRACT;
             }
         }
 
-        buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
+                req.getCookieList());
+        mess.encode(out);
         return FUNCT;
     }
 
-    protected G8RCalculator state_Multiply(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Multiply(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
+        G8RRequest req = (G8RRequest)mess;
+
         if(req.getParams().length < 1) {
-            buildErrResponse(MULTIPLY.getName(), errMult + msgEnterNum +
-                            msgMult, req.getCookieList()).encode(out);
+            mess = buildErrResponse(MULTIPLY.getName(), errMult + msgEnterNum +
+                            msgMult, req.getCookieList());
+            mess.encode(out);
             return MULTIPLY;
         }
 
@@ -202,22 +221,25 @@ public enum G8RCalculator implements G8RFunction {
                         getValue(cookie_Sum)) * Integer.parseInt(s);
                 req.getCookieList().add(cookie_Sum, String.valueOf(result));
             } catch(NumberFormatException nfe) {
-                buildErrResponse(MULTIPLY.getName(),
+                mess = buildErrResponse(MULTIPLY.getName(),
                         errNumberFormat + msgEnterNum + msgMult,
-                        req.getCookieList()).encode(out);
+                        req.getCookieList());
+                mess.encode(out);
                 return MULTIPLY;
             }
         }
 
-        buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(FUNCT.getName(), buildSum(req.getCookieList()),
+                req.getCookieList());
+        mess.encode(out);
         return FUNCT;
     }
 
-    protected G8RCalculator state_Exit(G8RRequest req, MessageOutput out)
+    protected G8RCalculator state_Exit(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
-        buildOkResponse(NULL.getName(), buildFinalSum(req.getCookieList()),
-                req.getCookieList()).encode(out);
+        mess = buildOkResponse(NULL.getName(), buildFinalSum(mess.getCookieList()),
+                mess.getCookieList());
+        mess.encode(out);
         return NULL;
     }
 

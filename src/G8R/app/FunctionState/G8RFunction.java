@@ -7,7 +7,7 @@
  */
 package G8R.app.FunctionState;
 
-import G8R.serialization.G8RRequest;
+import G8R.serialization.G8RMessage;
 import G8R.serialization.MessageOutput;
 import G8R.serialization.ValidationException;
 
@@ -26,6 +26,6 @@ public interface G8RFunction {
         return "";
     }
 
-    Enum<?> next(G8RRequest request, MessageOutput out)
+    Enum<?> next(G8RMessage request, MessageOutput out)
             throws ValidationException, IOException;
 }

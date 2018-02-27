@@ -10,6 +10,7 @@ package G8R.app;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
@@ -26,6 +27,8 @@ public class G8RServer {
 
     private static final String msgServerStart = "Server started on port: ";
     private static final String msgServerEnd = "Server closed on port: ";
+
+    private static final int server_Timeout = 20000;
 
     private static Logger logger = null;
 
@@ -48,7 +51,9 @@ public class G8RServer {
         setup_logger();
 
         try(ServerSocket server = new ServerSocket(servPort)) {
+            setup_Server(server);
             logger.info(msgServerStart + server.getLocalPort());
+
             while(true) {
                 pool.execute(new G8RClientHandler(server.accept()));
             }
@@ -57,7 +62,17 @@ public class G8RServer {
         } finally {
             logger.log(Level.INFO, msgServerEnd);
         }
+    }
 
+    /**
+     * sets up the configureation of tbe server
+     * @param server the server connection
+     * @throws SocketException if socket problem
+     */
+    private static void setup_Server(ServerSocket server)
+            throws SocketException {
+        server.setSoTimeout(server_Timeout);
+        server.setReuseAddress(true);
     }
 
     /**
