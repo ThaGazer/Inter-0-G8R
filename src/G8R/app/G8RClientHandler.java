@@ -12,6 +12,7 @@ import G8R.app.FunctionState.G8RFunctionFactory;
 import G8R.serialization.*;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Objects;
 import java.util.logging.*;
 
@@ -23,28 +24,26 @@ public class G8RClientHandler implements Runnable {
     //messages to client
     private static final String msgConnection = "connected to: ";
     private static final String msgCloseConnect = "closed connection to: ";
-    private static final String msgSendMessage = "sending to client";
-    private static final String msgRecivMessage = "receive from client";
+    private static final String msgClientClose = " ***client terminated";
 
-    private static final String LOGGERNAME = G8RClientHandler.class.getName();
-    private static final String LOGGERFILE = "/logs/connections.log";
+    private static final String LOGGERNAME = G8RServer.class.getName();
 
     //class variables
     private Socket client;
-    private Logger logger;
+    private Logger logger = Logger.getLogger(LOGGERNAME);
 
     /**
      * creates a new clientHandler runnable
      * @param socket the client connection
      */
-    public G8RClientHandler(Socket socket) {
+    public G8RClientHandler(Socket socket) throws SocketException {
         client = Objects.requireNonNull(socket);
+        client.setSoTimeout(20000);
     }
 
     @Override
     public void run() {
         try {
-            setup_logger();
             logger.info(msgConnection + client.getLocalSocketAddress());
 
             MessageInput in = new MessageInput(client.getInputStream());
@@ -72,9 +71,9 @@ public class G8RClientHandler implements Runnable {
             client.close();
             logger.info(msgCloseConnect + client.getLocalSocketAddress());
         } catch(ValidationException ve) {
-            logger.severe(ve.getReason());
+            logger.severe(ve.getReason() + msgClientClose);
         } catch(IOException e) {
-            logger.severe(e.getMessage());
+            logger.warning(e.getMessage() + msgClientClose);
         } finally {
             try {
                 client.close();
@@ -120,33 +119,5 @@ public class G8RClientHandler implements Runnable {
             return client.getLocalSocketAddress() + "-" + Thread.currentThread()
                     + " [Sent:" + message + "]";
         }
-    }
-
-    /**
-     * sets up the logger for the server
-     * @throws IOException if I/O problem
-     */
-    private void setup_logger() throws IOException {
-        LogManager manager = LogManager.getLogManager();
-        manager.reset();
-
-        /*future implementation maybe
-        manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
-
-        //initializes the logger
-        logger = Logger.getLogger(LOGGERNAME);
-
-        //defines handles for the logger
-        Handler fileHand = new FileHandler(LOGGERFILE);
-        Handler consoleHand = new ConsoleHandler();
-
-        fileHand.setLevel(Level.ALL);
-        consoleHand.setLevel(Level.SEVERE);
-
-        //sets the formatting style of the logs
-        consoleHand.setFormatter(new SimpleFormatter());
-
-        logger.addHandler(fileHand);
-        logger.addHandler(consoleHand);
     }
 }

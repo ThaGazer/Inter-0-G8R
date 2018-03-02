@@ -19,14 +19,14 @@ public class G8RServer {
 
     //private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGGERNAME = G8RServer.class.getName();
-    private static final String LOGGERFILE = "./logs/server.log";
+    private static final String LOGGERFILE = "./logs/connections.log";
 
     private static final String errParams =
             "Usage: <server port> <thread count>";
     private static final String errCrash = "Server crashed";
 
     private static final String msgServerStart = "Server started on port: ";
-    private static final String msgServerEnd = "Server closed on port: ";
+    private static final String msgServerEnd = "Server closed";
 
     private static final int server_Timeout = 20000;
 
@@ -71,7 +71,6 @@ public class G8RServer {
      */
     private static void setup_Server(ServerSocket server)
             throws SocketException {
-        server.setSoTimeout(server_Timeout);
         server.setReuseAddress(true);
     }
 
