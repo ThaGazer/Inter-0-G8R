@@ -10,6 +10,8 @@ package G8R.app;
 import G8R.app.FunctionState.G8RFunction;
 import G8R.app.FunctionState.G8RFunctionFactory;
 import G8R.serialization.*;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
@@ -17,19 +19,22 @@ import java.util.logging.*;
 
 public class G8RClientHandler implements Runnable {
 
+    //logging information
+    private static final String LOGGERNAME = G8RServer.class.getName();
+    private static final String LOGGERFILE = "./logs/connections.log";
+
     //error message to client
     private static final String errFunction = "Unexpected function";
+    private static final String errNullSocket = "null socket";
 
     //messages to client
     private static final String msgConnection = "connected to: ";
     private static final String msgCloseConnect = "closed connection to: ";
-    private static final String msgSendMessage = "sending to client";
-    private static final String msgRecivMessage = "receive from client";
-
-    private static final String LOGGERNAME = G8RClientHandler.class.getName();
-    private static final String LOGGERFILE = "/logs/connections.log";
+    private static final String msgCreatedLogFile = "Created new logging file";
 
     //class variables
+    private static final int server_Timeout = 20000;
+
     private Socket client;
     private Logger logger;
 
@@ -37,14 +42,15 @@ public class G8RClientHandler implements Runnable {
      * creates a new clientHandler runnable
      * @param socket the client connection
      */
-    public G8RClientHandler(Socket socket) {
-        client = Objects.requireNonNull(socket);
+    public G8RClientHandler(Socket socket) throws IOException {
+        client = Objects.requireNonNull(socket, errNullSocket);
+        client.setSoTimeout(server_Timeout);
+        setup_logger();
     }
 
     @Override
     public void run() {
         try {
-            setup_logger();
             logger.info(msgConnection + client.getLocalSocketAddress());
 
             MessageInput in = new MessageInput(client.getInputStream());
@@ -72,9 +78,9 @@ public class G8RClientHandler implements Runnable {
             client.close();
             logger.info(msgCloseConnect + client.getLocalSocketAddress());
         } catch(ValidationException ve) {
-            logger.severe(ve.getReason());
+            logger.warning(ve.getReason());
         } catch(IOException e) {
-            logger.severe(e.getMessage());
+            logger.warning(e.getMessage());
         } finally {
             try {
                 client.close();
@@ -127,14 +133,12 @@ public class G8RClientHandler implements Runnable {
      * @throws IOException if I/O problem
      */
     private void setup_logger() throws IOException {
-        LogManager manager = LogManager.getLogManager();
-        manager.reset();
-
-        /*future implementation maybe
-        manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
-
         //initializes the logger
         logger = Logger.getLogger(LOGGERNAME);
+
+        if(new File(LOGGERFILE).createNewFile()) {
+            logger.info(msgCreatedLogFile);
+        }
 
         //defines handles for the logger
         Handler fileHand = new FileHandler(LOGGERFILE);

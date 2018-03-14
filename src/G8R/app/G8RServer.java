@@ -7,10 +7,8 @@
  */
 package G8R.app;
 
-
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
@@ -28,17 +26,16 @@ public class G8RServer {
     private static final String msgServerStart = "Server started on port: ";
     private static final String msgServerEnd = "Server closed on port: ";
 
-    private static final int server_Timeout = 20000;
-
     private static Logger logger = null;
 
     /**
      * sends and receives messages from multiple clients
+     *
      * @param argv arguments to passed to server
      * @throws IOException if I/O problem
      */
     public static void main(String[] argv) throws IOException {
-        if(argv.length != 2) {
+        if (argv.length != 2) {
             throw new IllegalArgumentException(errParams);
         }
 
@@ -50,41 +47,29 @@ public class G8RServer {
         //initializes logger
         setup_logger();
 
-        try(ServerSocket server = new ServerSocket(servPort)) {
-            setup_Server(server);
+        try (ServerSocket server = new ServerSocket(servPort)) {
             logger.info(msgServerStart + server.getLocalPort());
-
-            while(true) {
+            while (true) {
                 pool.execute(new G8RClientHandler(server.accept()));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, errCrash, e);
         } finally {
-            logger.log(Level.INFO, msgServerEnd);
+            logger.log(Level.SEVERE, msgServerEnd);
         }
     }
 
     /**
-     * sets up the configureation of tbe server
-     * @param server the server connection
-     * @throws SocketException if socket problem
-     */
-    private static void setup_Server(ServerSocket server)
-            throws SocketException {
-        server.setSoTimeout(server_Timeout);
-        server.setReuseAddress(true);
-    }
-
-    /**
      * sets up the logger for the server
+     *
      * @throws IOException if I/O problem
      */
     private static void setup_logger() throws IOException {
         LogManager manager = LogManager.getLogManager();
         manager.reset();
 
-        /*future implementation maybe
-        manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
+        //future implementation maybe
+        //manager.readConfiguration(new FileInputStream(LOGGERCONFIG));
 
         //initializes the logger
         logger = Logger.getLogger(LOGGERNAME);
