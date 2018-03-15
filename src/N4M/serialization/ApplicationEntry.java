@@ -7,10 +7,17 @@
  */
 package N4M.serialization;
 
+import java.util.Objects;
+
 /**
  * Represents one application and its access count
  */
 public class ApplicationEntry {
+
+    private static final String errName = "invalid application name";
+    private static final String errCount = "invalid application count";
+
+    private final String alphaNum = "[\\w]*";
 
     private String applicationName;
     private int count;
@@ -18,9 +25,7 @@ public class ApplicationEntry {
     /**
      * Creates an empty application entry
      */
-    public ApplicationEntry() {
-
-    }
+    public ApplicationEntry() {}
 
     /**
      * Creates an application entry
@@ -42,6 +47,8 @@ public class ApplicationEntry {
      */
     public ApplicationEntry(String appName, int accessCt)
             throws N4MException, NullPointerException {
+        setApplicationName(appName);
+        setAccessCount(accessCt);
     }
 
     /**
@@ -54,11 +61,13 @@ public class ApplicationEntry {
 
     /**
      * Set application access count
-     * @params access count
+     * @param accessCount access count
      * @throws N4MException if validation fails
      */
     public void setAccessCount(int accessCount) throws N4MException {
-
+        if(accessCount < 0) {
+            throw new N4MException(errCount, ErrorCodeType.BADMSG);
+        }
     }
 
     /**
@@ -77,21 +86,29 @@ public class ApplicationEntry {
      */
     public void setApplicationName(String appName)
             throws N4MException, NullPointerException {
-
+        if(!appName.matches(alphaNum)) {
+            throw new N4MException(errName, ErrorCodeType.BADMSG);
+        }
+        applicationName = Objects.requireNonNull(appName);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return getApplicationName().hashCode() +
+                Integer.hashCode(getAccessCount());
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ApplicationEntry app = (ApplicationEntry)o;
+        return getApplicationName().equals(app.getApplicationName())
+               && getAccessCount() == app.getAccessCount();
     }
 
     @Override
     public String toString() {
-        return "";
+        return "Name=" + getApplicationName() + "Count=" + getAccessCount();
     }
 }

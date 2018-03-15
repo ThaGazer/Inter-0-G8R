@@ -20,7 +20,7 @@ public class N4MException extends Exception {
      * @param ect type of error
      */
     public N4MException(String msg, ErrorCodeType ect) {
-
+        this(msg, ect, null);
     }
 
     /**
@@ -32,7 +32,8 @@ public class N4MException extends Exception {
      */
     public N4MException(String msg, ErrorCodeType ect, Throwable cause)
             throws NullPointerException {
-
+        super(msg, cause);
+        errorCodeType = ect;
     }
 
     /**

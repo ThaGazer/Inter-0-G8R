@@ -13,11 +13,11 @@ package N4M.serialization;
 public enum ErrorCodeType {
     BM(0), BMS(1), IH(2), NE(3), SR(4);
 
-    private static final ErrorCodeType BADMSG = BM;
-    private static final ErrorCodeType BADMSGSIZE = BMS;
-    private static final ErrorCodeType INCORRECTHEADER = IH;
-    private static final ErrorCodeType NOERROR = NE;
-    private static final ErrorCodeType SERVERERROR = SR;
+    public static final ErrorCodeType BADMSG = BM;
+    public static final ErrorCodeType BADMSGSIZE = BMS;
+    public static final ErrorCodeType INCORRECTHEADER = IH;
+    public static final ErrorCodeType NOERROR = NE;
+    public static final ErrorCodeType SERVERERROR = SR;
 
     private int errorCode;
     ErrorCodeType(int code) {
