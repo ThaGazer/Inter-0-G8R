@@ -11,7 +11,7 @@ package N4M.serialization;
  * Error code enumerated type
  */
 public enum ErrorCodeType {
-    BM, BMS, IH, NE, SR;
+    BM(0), BMS(1), IH(2), NE(3), SR(4);
 
     private static final ErrorCodeType BADMSG = BM;
     private static final ErrorCodeType BADMSGSIZE = BMS;
@@ -19,6 +19,10 @@ public enum ErrorCodeType {
     private static final ErrorCodeType NOERROR = NE;
     private static final ErrorCodeType SERVERERROR = SR;
 
+    private int errorCode;
+    ErrorCodeType(int code) {
+        errorCode = code;
+    }
     /**
      * Return errror code corresponding to the error code number
      * @param errorCodeNum error code number to find
@@ -31,9 +35,9 @@ public enum ErrorCodeType {
 
     /**
      * Return error code number corresponding to the error code
-     * @return
+     * @return error code number corresponding to the error code
      */
     public int getErrorCodeNum() {
-        return 0;
+        return errorCode;
     }
 }
