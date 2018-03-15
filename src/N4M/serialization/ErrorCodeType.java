@@ -19,6 +19,8 @@ public enum ErrorCodeType {
     public static final ErrorCodeType NOERROR = NE;
     public static final ErrorCodeType SERVERERROR = SR;
 
+    private static final String errNum = "invalid error code number";
+
     private int errorCode;
     ErrorCodeType(int code) {
         errorCode = code;
@@ -30,7 +32,20 @@ public enum ErrorCodeType {
      * @throws N4MException if invalid error code number
      */
     public static ErrorCodeType valueOf(int errorCodeNum) throws N4MException {
-        return NE;
+        switch(errorCodeNum) {
+            case 0:
+                return NOERROR;
+            case 1:
+                return INCORRECTHEADER;
+            case 2:
+                return BADMSGSIZE;
+            case 3:
+                return BADMSG;
+            case 4:
+                return SERVERERROR;
+            default:
+                throw new N4MException(errNum, INCORRECTHEADER);
+        }
     }
 
     /**
