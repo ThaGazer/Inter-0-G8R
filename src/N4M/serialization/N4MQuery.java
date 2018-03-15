@@ -13,6 +13,13 @@ package N4M.serialization;
 public class N4MQuery extends N4MMessage {
 
     /**
+     * Creates an empty N4M query
+     */
+    public N4MQuery() {
+
+    }
+
+    /**
      * Creates a new N4M query using given values
      * @param msgId message id
      * @param businessName business name

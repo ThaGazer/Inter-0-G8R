@@ -17,6 +17,13 @@ import java.util.List;
 public class N4MResponse extends N4MMessage {
 
     /**
+     * Creates new empty N4M response
+     */
+    public N4MResponse() {
+
+    }
+
+    /**
      * Creates a new N4M request using given values
      * @param errorCodeNum error number
      * @param msgId message id
