@@ -7,9 +7,9 @@
  */
 package N4M.serialization.test;
 
+import N4M.serialization.ErrorCodeType;
 import N4M.serialization.N4MException;
 import N4M.serialization.N4MMessage;
-import N4M.serialization.N4MQuery;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -18,8 +18,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class testN4MMessage {
-
-    private N4MQuery q = new N4MQuery();
 
     @ParameterizedTest
     @MethodSource("getValid")
@@ -31,6 +29,24 @@ public class testN4MMessage {
     @MethodSource("getInvalid")
     public void testInvalidEncode(byte[] bArr) {
         assertThrows(N4MException.class, ()-> N4MMessage.decode(bArr));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValid")
+    public void testSetMessageId(byte[] bArr) throws N4MException {
+        int testId = Integer.MAX_VALUE;
+        N4MMessage message = N4MMessage.decode(bArr);
+        message.setMsgId(testId);
+        assertEquals(testId, message.getMsgId());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValid")
+    public void testSetErrorCodeType(byte[] bArr) throws N4MException {
+        ErrorCodeType testEct = ErrorCodeType.NOERROR;
+        N4MMessage message = N4MMessage.decode(bArr);
+        message.setErrorCodeNum(testEct.getErrorCodeNum());
+        assertEquals(testEct.getErrorCodeNum(), message.getErrorCodeNum());
     }
 
     public static Stream<byte[]> getValid() {

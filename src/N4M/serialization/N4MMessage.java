@@ -13,6 +13,13 @@ package N4M.serialization;
  */
 public class N4MMessage {
 
+    private static final String errMessID = "invalid message ID";
+
+    public static final String alphaNum = "[\\w]+";
+
+    private ErrorCodeType errorCode;
+    private int messageId;
+
     /**
      * Creates a new N4M message by deserializing from the given byte array
      * according to the specified serialization.
@@ -39,7 +46,7 @@ public class N4MMessage {
      * @return error code number
      */
     public int getErrorCodeNum() {
-        return 0;
+        return errorCode.getErrorCodeNum();
     }
 
     /**
@@ -47,7 +54,7 @@ public class N4MMessage {
      * @return message id
      */
     public int getMsgId() {
-        return 0;
+        return messageId;
     }
 
     /**
@@ -56,7 +63,7 @@ public class N4MMessage {
      * @throws N4MException if validation fails
      */
     public void setErrorCodeNum(int errorCodeNum) throws N4MException {
-
+        errorCode = ErrorCodeType.valueOf(errorCodeNum);
     }
 
     /**
@@ -65,7 +72,10 @@ public class N4MMessage {
      * @throws if validation fails
      */
     public void setMsgId(int msgId) throws N4MException {
-
+        if(msgId < 0) {
+            throw new N4MException(errMessID, ErrorCodeType.BADMSG);
+        }
+        messageId = msgId;
     }
 
     public int hashCode() {

@@ -17,7 +17,7 @@ public class ApplicationEntry {
     private static final String errName = "invalid application name";
     private static final String errCount = "invalid application count";
 
-    private final String alphaNum = "[\\w]*";
+    private final String alphaNum = "[\\w]+";
 
     private String applicationName;
     private int count;

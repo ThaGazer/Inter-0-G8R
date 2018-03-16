@@ -7,17 +7,22 @@
  */
 package N4M.serialization;
 
+import java.util.Objects;
+
 /**
  * Represents an N4M query and provides serialization/deserialization
  */
 public class N4MQuery extends N4MMessage {
 
+    private static final String errBusinessName = "invalid business name";
+    private static final String errNullName = "null business name";
+
+    private String queryBusinessName;
+
     /**
      * Creates an empty N4M query
      */
-    public N4MQuery() {
-
-    }
+    public N4MQuery() {}
 
     /**
      * Creates a new N4M query using given values
@@ -28,7 +33,8 @@ public class N4MQuery extends N4MMessage {
      */
     public N4MQuery(int msgId, String businessName)
             throws N4MException, NullPointerException {
-
+        setMsgId(msgId);
+        setBusinessName(businessName);
     }
 
     /**
@@ -36,7 +42,7 @@ public class N4MQuery extends N4MMessage {
      * @return business name
      */
     public String getBusinessName() {
-        return "";
+        return queryBusinessName;
     }
 
     /**
@@ -47,7 +53,10 @@ public class N4MQuery extends N4MMessage {
      */
     public void setBusinessName(String businessName)
             throws N4MException, NullPointerException {
-
+        if(!businessName.matches(alphaNum)) {
+            throw new N4MException(errBusinessName, ErrorCodeType.BADMSG);
+        }
+        queryBusinessName = Objects.requireNonNull(businessName, errNullName);
     }
 
     /**
@@ -57,7 +66,7 @@ public class N4MQuery extends N4MMessage {
      */
     @Override
     public void setErrorCodeNum(int errorCodeNum) throws N4MException {
-
+        super.setErrorCodeNum(errorCodeNum);
     }
 
     public int hashCode() {

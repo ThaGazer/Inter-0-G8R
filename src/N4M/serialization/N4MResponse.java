@@ -8,6 +8,7 @@
 package N4M.serialization;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -16,12 +17,15 @@ import java.util.List;
  */
 public class N4MResponse extends N4MMessage {
 
+    private static final String errTime = "invalid timestamp";
+
+    private Date responseTime;
+    private List<ApplicationEntry> responseApplications;
+
     /**
      * Creates new empty N4M response
      */
-    public N4MResponse() {
-
-    }
+    public N4MResponse() {}
 
     /**
      * Creates a new N4M request using given values
@@ -35,7 +39,10 @@ public class N4MResponse extends N4MMessage {
     public N4MResponse(int errorCodeNum, int msgId, Date timeStamp,
                        List<ApplicationEntry> applications)
             throws N4MException, NullPointerException {
-
+        setErrorCodeNum(errorCodeNum);
+        setMsgId(msgId);
+        setTimeStamp(timeStamp);
+        setApplications(applications);
     }
 
     /**
@@ -43,7 +50,8 @@ public class N4MResponse extends N4MMessage {
      * @return list of applications
      */
     public List<ApplicationEntry> getApplications() {
-        return new ArrayList<>();
+        return (List<ApplicationEntry>)
+                Collections.unmodifiableCollection(responseApplications);
     }
 
     /**
@@ -51,7 +59,7 @@ public class N4MResponse extends N4MMessage {
      * @return timestamp
      */
     public Date getTimeStamp() {
-        return new Date();
+        return (Date) responseTime.clone();
     }
 
     /**
@@ -61,7 +69,7 @@ public class N4MResponse extends N4MMessage {
      */
     public void setApplications(List<ApplicationEntry> applications)
             throws NullPointerException {
-
+        responseApplications.addAll(applications);
     }
 
     /**
@@ -72,7 +80,10 @@ public class N4MResponse extends N4MMessage {
      */
     public void setTimeStamp(Date timeStamp)
             throws N4MException, NullPointerException {
-
+        if(timeStamp.before(new Date(1970))) {
+            throw new N4MException(errTime, ErrorCodeType.BADMSG);
+        }
+        responseTime.setTime(timeStamp.getTime());
     }
 
     public int hashCode() {
