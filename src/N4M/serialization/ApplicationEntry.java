@@ -109,6 +109,6 @@ public class ApplicationEntry {
 
     @Override
     public String toString() {
-        return "Name=" + getApplicationName() + "Count=" + getAccessCount();
+        return "[" + getApplicationName() + "=" + getAccessCount() + "]";
     }
 }

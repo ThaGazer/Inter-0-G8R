@@ -79,14 +79,18 @@ public class N4MMessage {
     }
 
     public int hashCode() {
-        return 0;
+        return Integer.hashCode(getMsgId()) + errorCode.hashCode();
     }
 
     public boolean equals(Object obj) {
-        return false;
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
+        N4MMessage that = (N4MMessage)obj;
+        return getMsgId() == that.getMsgId() &&
+                getErrorCodeNum() == that.getErrorCodeNum();
     }
 
     public String toString() {
-        return "";
+        return "ID=" + getMsgId() + "ErrorCode=" + getErrorCodeNum();
     }
 }

@@ -70,14 +70,18 @@ public class N4MQuery extends N4MMessage {
     }
 
     public int hashCode() {
-        return 0;
+        return super.hashCode() + getBusinessName().hashCode();
     }
 
     public boolean equals(Object obj) {
-        return false;
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
+        N4MQuery that = (N4MQuery)obj;
+        return super.equals(that) &&
+                getBusinessName().equals(that.getBusinessName());
     }
 
     public String toString() {
-        return "";
+        return super.toString() + "BusinessName=" + getBusinessName();
     }
 }

@@ -7,10 +7,7 @@
  */
 package N4M.serialization;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents an N4M response and provides serialization/deserialization
@@ -19,8 +16,8 @@ public class N4MResponse extends N4MMessage {
 
     private static final String errTime = "invalid timestamp";
 
-    private Date responseTime;
-    private List<ApplicationEntry> responseApplications;
+    private Date responseTime = new Date();
+    private List<ApplicationEntry> responseApplications = new ArrayList<>();
 
     /**
      * Creates new empty N4M response
@@ -87,14 +84,30 @@ public class N4MResponse extends N4MMessage {
     }
 
     public int hashCode() {
-        return 0;
+        return responseTime.hashCode() + responseApplications.hashCode();
     }
 
     public boolean equals(Object obj) {
-        return false;
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
+        N4MResponse that = (N4MResponse)obj;
+        return responseApplications.equals(that.responseApplications) &&
+            responseTime.equals(that.responseTime);
     }
 
     public String toString() {
-        return "";
+        String msg = super.toString() + "Date=" + getTimeStamp() +
+                "Applications=";
+
+        boolean first = true;
+        for(ApplicationEntry ae : getApplications()) {
+            if(first) {
+                msg += ae.toString();
+                first = false;
+            } else {
+                msg += ", " + ae.toString();
+            }
+        }
+        return msg;
     }
 }
