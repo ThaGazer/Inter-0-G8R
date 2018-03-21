@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2018-03-01T19:12:10</date>
+  <millis>1519953130041</millis>
+  <sequence>0</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RServer</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Server started on port: 12345</message>
+</record>
+<record>
+  <date>2018-03-01T19:12:48</date>
+  <millis>1519953168121</millis>
+  <sequence>1</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>12</thread>
+  <message>connected to: /127.0.0.1:12345</message>
+</record>
+<record>
+  <date>2018-03-01T19:12:51</date>
+  <millis>1519953171625</millis>
+  <sequence>2</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>handleRequest</method>
+  <thread>12</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-1,5,main] [Received:G8R/1.0=QFunction=PollParameters=[]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=PollParameters=[]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:12:51</date>
+  <millis>1519953171627</millis>
+  <sequence>3</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>12</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-1,5,main] [Sent:G8R/1.0=QFunction=PollParameters=[]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=PollParameters=[]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:12:54</date>
+  <millis>1519953174774</millis>
+  <sequence>4</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>handleRequest</method>
+  <thread>12</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-1,5,main] [Received:G8R/1.0=QFunction=FoodMoodParameters=[mex]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=FoodMoodParameters=[mex]Cookies=[FName=j,LName=r,Repeat=10,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:12:54</date>
+  <millis>1519953174775</millis>
+  <sequence>5</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>12</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-1,5,main] [Sent:G8R/1.0=QFunction=FoodMoodParameters=[mex]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=FoodMoodParameters=[mex]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:12:54</date>
+  <millis>1519953174776</millis>
+  <sequence>6</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>12</thread>
+  <message>closed connection to: 0.0.0.0/0.0.0.0:12345</message>
+</record>
+<record>
+  <date>2018-03-01T19:13:05</date>
+  <millis>1519953185371</millis>
+  <sequence>7</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>13</thread>
+  <message>connected to: /127.0.0.1:12345</message>
+</record>
+<record>
+  <date>2018-03-01T19:13:10</date>
+  <millis>1519953190467</millis>
+  <sequence>8</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>handleRequest</method>
+  <thread>13</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-2,5,main] [Received:G8R/1.0=QFunction=MathParameters=[]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=MathParameters=[]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:13:10</date>
+  <millis>1519953190468</millis>
+  <sequence>9</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>13</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-2,5,main] [Sent:G8R/1.0=QFunction=MathParameters=[]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=MathParameters=[]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:13:14</date>
+  <millis>1519953194590</millis>
+  <sequence>10</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>handleRequest</method>
+  <thread>13</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-2,5,main] [Received:G8R/1.0=QFunction=OperatorParameters=[fin]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=OperatorParameters=[fin]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:13:14</date>
+  <millis>1519953194591</millis>
+  <sequence>11</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>13</thread>
+  <message>/127.0.0.1:12345-Thread[pool-1-thread-2,5,main] [Sent:G8R/1.0=QFunction=OperatorParameters=[fin]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]]</message>
+  <param>G8R/1.0=QFunction=OperatorParameters=[fin]Cookies=[FName=j,LName=r,Repeat=11,Sum=0]</param>
+</record>
+<record>
+  <date>2018-03-01T19:13:14</date>
+  <millis>1519953194591</millis>
+  <sequence>12</sequence>
+  <logger>G8R.app.G8RServer</logger>
+  <level>INFO</level>
+  <class>G8R.app.G8RClientHandler</class>
+  <method>run</method>
+  <thread>13</thread>
+  <message>closed connection to: 0.0.0.0/0.0.0.0:12345</message>
+</record>
