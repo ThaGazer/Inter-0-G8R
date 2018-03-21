@@ -7,13 +7,10 @@
  */
 package G8R.app.test;
 
-
-import G8R.serialization.*;
-
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class G8REchoServer {
 
@@ -26,13 +23,14 @@ public class G8REchoServer {
         }
         int servPort = Integer.parseInt(argv[0]);
 
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
         try (ServerSocket servSock = new ServerSocket(servPort)) {
             System.out.println(serverStatus + servSock.getLocalSocketAddress());
 
             while(true) {
                 try {
-                    Thread t = new Handler(servSock.accept());
-                    t.start();
+                    pool.execute(new G8RTestHandler(servSock.accept()));
                 } catch(Exception e) {
                     System.err.println(e.getMessage());
                 }
@@ -42,25 +40,5 @@ public class G8REchoServer {
         }
     }
 
-    public static class Handler extends Thread {
 
-        private Socket client;
-
-        public Handler(Socket socket) {
-            client = Objects.requireNonNull(socket);
-        }
-
-        @Override
-        public void run() {
-            try {
-                MessageInput in = new MessageInput(client.getInputStream());
-                MessageOutput out = new MessageOutput(client.getOutputStream());
-
-                G8RMessage message = G8RMessage.decode(in);
-                message.encode(out);
-            } catch (IOException | ValidationException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }
