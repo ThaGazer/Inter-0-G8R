@@ -7,7 +7,10 @@
  */
 package N4M.serialization;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static N4M.serialization.N4MMessage.*;
@@ -17,11 +20,14 @@ import static N4M.serialization.N4MMessage.*;
  */
 public class ApplicationEntry {
 
+    //error messages
     private static final String errName = "invalid application name";
     private static final String errCount = "invalid application count";
 
+    //string parsing
     private final String alphaNum = "[\\w]+";
 
+    //member variables
     private String applicationName;
     private int accessCount = 0;
 
@@ -54,8 +60,24 @@ public class ApplicationEntry {
         setAccessCount(accessCt);
     }
 
+    /**
+     * encodes application entry
+     * @return application entry
+     */
     public byte[] encode() {
-        return new byte[]{};
+        ByteArrayOutputStream ret = new ByteArrayOutputStream();
+
+        try {
+            byte[] countByte = i2b(getAccessCount());
+
+            ret.write(Arrays.copyOfRange(countByte, 2, countByte.length));
+            ret.write((byte) getApplicationName().length());
+            ret.write(getApplicationName().getBytes(StandardCharsets.US_ASCII));
+
+            return ret.toByteArray();
+        } catch(IOException e) {
+            return null;
+        }
     }
 
     /**

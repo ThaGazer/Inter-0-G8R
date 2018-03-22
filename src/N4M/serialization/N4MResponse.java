@@ -7,9 +7,10 @@
  */
 package N4M.serialization;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.temporal.TemporalField;
 import java.util.*;
 
 /**
@@ -17,8 +18,10 @@ import java.util.*;
  */
 public class N4MResponse extends N4MMessage {
 
+    //error messages
     private static final String errTime = "invalid timestamp";
 
+    //member variables
     private Date responseTime = new Date();
     private List<ApplicationEntry> responseApplications = new ArrayList<>();
 
@@ -45,13 +48,21 @@ public class N4MResponse extends N4MMessage {
         setApplications(applications);
     }
 
+    /**
+     * decodes response message
+     * @param errCode error code
+     * @param msgId message id
+     * @param in message byte array
+     * @return response message
+     * @throws N4MException if validations fails
+     */
     public static N4MResponse decode(int errCode, int msgId, byte[] in)
             throws N4MException {
 
         int readPos = 0;
 
         //timestamp
-        long time = b2i(getBytes(readPos, 4, in));
+        long time = b2i(getBytes(readPos, readPos+4, in));
         readPos += 4;
 
         int appCount = unsignByte(getByte(readPos++, in));
@@ -59,25 +70,65 @@ public class N4MResponse extends N4MMessage {
         List<ApplicationEntry> entries = new ArrayList<>();
         for(int i = 0; i < appCount; i++) {
             //application use count
-            int count = (int) b2i(getBytes(readPos, 2, in));
+            int count = (int) b2i(getBytes(readPos, readPos+2, in));
             readPos += 2;
 
             //length of application name in bytes
             int nameLen = getByte(readPos++, in);
 
             //application name
-            String name = new String(getBytes(readPos, readPos+nameLen, in),
-                    StandardCharsets.US_ASCII);
+            String name = "";
+            if(nameLen != 0) {
+                name = new String(getBytes(readPos, readPos+nameLen, in),
+                        StandardCharsets.US_ASCII);
+            }
+            readPos += nameLen;
 
             entries.add(new ApplicationEntry(name, count));
+        }
+
+        if(readPos < in.length) {
+            throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
 
         return new N4MResponse(errCode, msgId, new Date(time), entries);
     }
 
+    /**
+     * encodes response message
+     * @return response message or null if buffer problem
+     */
     @Override
     public byte[] encode() {
-        return new byte[]{};
+        ByteArrayOutputStream ret = new ByteArrayOutputStream();
+
+        try {
+            //message header
+            byte[] header = super.encode();
+
+            //set qrCode
+            header[0] |= (0x08);
+
+            //set errorCode
+            header[0] |= (getErrorCodeNum() & 0x07);
+
+            ret.write(header);
+
+            //Timestamp
+            ret.write(i2b((int) getTimeStamp().getTime()));
+
+            //ApplicationsCount
+            ret.write((byte) getApplications().size());
+
+            for(ApplicationEntry ae : getApplications()) {
+                //Application Entries
+                ret.write(ae.encode());
+            }
+
+            return ret.toByteArray();
+        } catch(IOException e) {
+            return null;
+        }
     }
 
     /**
@@ -85,8 +136,7 @@ public class N4MResponse extends N4MMessage {
      * @return list of applications
      */
     public List<ApplicationEntry> getApplications() {
-        return (List<ApplicationEntry>)
-                Collections.unmodifiableCollection(responseApplications);
+        return Collections.unmodifiableList(responseApplications);
     }
 
     /**

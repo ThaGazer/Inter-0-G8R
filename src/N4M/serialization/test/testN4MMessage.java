@@ -24,7 +24,7 @@ public class testN4MMessage {
     @ParameterizedTest
     @MethodSource("getValid")
     public void testValidEncode(byte[] bArr) throws N4MException {
-        assertArrayEquals(N4MMessage.decode(bArr).encode(), bArr);
+        assertArrayEquals(bArr, N4MMessage.decode(bArr).encode());
     }
 
     @ParameterizedTest
@@ -50,13 +50,22 @@ public class testN4MMessage {
         message.setErrorCodeNum(testEct.getErrorCodeNum());
         assertEquals(testEct.getErrorCodeNum(), message.getErrorCodeNum());
     }
+
     public static Stream<byte[]> getValid() {
-        return Stream.of(new byte[]{0x20, 0x01, 0x01, 0x49},
-                new byte[]{0x28, 0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
-                        0x00, 0x01, 0x49});
+        return Stream.of(new byte[]{0x20,0x01,0x01,0x31},
+                new byte[]{(byte) 0x28,0x02,0x00,0x00,0x00,0x00,0x01,0x00,0x01,
+                        0x01,0x31});
     }
 
     public static Stream<byte[]> getInvalid() {
-        return Stream.of("".getBytes());
+        return Stream.of("".getBytes(), new byte[]{0x00,0x01,0x01,0x31},
+                new byte[]{0x20,0x01,0x01},
+                new byte[]{0x20,0x01,0x01,0x31,0x31},
+                new byte[]{0x20,0x01}, new byte[]{0x20,0x01,0x01,0x01},
+                new byte[]{0x2e,0x01,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00,
+                        0x01,0x31,0x31},
+                new byte[]{0x28,0x01,0x01,0x00,0x00,0x00,0x01,0x00,0x00,
+                        0x01,0x31},
+                new byte[]{0x28,0x01,0x01,0x31});
     }
 }

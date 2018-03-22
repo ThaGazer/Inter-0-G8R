@@ -35,5 +35,4 @@ public class testN4MResponse {
         r.setTimeStamp(test);
         assertEquals(test, r.getTimeStamp());
     }
-
 }

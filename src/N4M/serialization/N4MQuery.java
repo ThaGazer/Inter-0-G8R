@@ -7,6 +7,8 @@
  */
 package N4M.serialization;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -40,6 +42,13 @@ public class N4MQuery extends N4MMessage {
         setBusinessName(businessName);
     }
 
+    /**
+     * decodes query message
+     * @param msgId message id
+     * @param in message byte array
+     * @return query message
+     * @throws N4MException if validation fails
+     */
     public static N4MQuery decode(int msgId, byte[] in)
             throws N4MException {
         if(in == null) {
@@ -49,10 +58,10 @@ public class N4MQuery extends N4MMessage {
         int readPos = 0;
 
         //length of business name in bytes
-        int nameLen = unsignByte(getByte(readPos, in));
+        int nameLen = unsignByte(getByte(readPos++, in));
 
         //bounds check
-        if(in.length < nameLen+1) {
+        if(nameLen+1 != in.length) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
 
@@ -63,9 +72,32 @@ public class N4MQuery extends N4MMessage {
         return new N4MQuery(msgId, name);
     }
 
+    /**
+     * encodes query message
+     * @return query message
+     */
     @Override
     public byte[] encode() {
-        return new byte[]{};
+        ByteArrayOutputStream ret = new ByteArrayOutputStream();
+
+        try {
+            //message header
+            byte[] header = super.encode();
+
+            //set qrCode
+            header[0] = (byte) (header[0] & 0xf7);
+            ret.write(header);
+
+            //BusinessNameLength
+            ret.write((byte) getBusinessName().length());
+
+            //Business name
+            ret.write(getBusinessName().getBytes(StandardCharsets.US_ASCII));
+
+            return ret.toByteArray();
+        } catch(IOException e) {
+            return null;
+        }
     }
 
     /**

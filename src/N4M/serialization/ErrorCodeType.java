@@ -11,20 +11,29 @@ package N4M.serialization;
  * Error code enumerated type
  */
 public enum ErrorCodeType {
-    BM(0), BMS(1), IH(2), NE(3), SR(4);
+    NE(0), IH(1), BMS(2), BM(3), SR(4);
 
+    //enum constants
     public static final ErrorCodeType BADMSG = BM;
     public static final ErrorCodeType BADMSGSIZE = BMS;
     public static final ErrorCodeType INCORRECTHEADER = IH;
     public static final ErrorCodeType NOERROR = NE;
     public static final ErrorCodeType SERVERERROR = SR;
 
+    //error messages
     private static final String errNum = "invalid error code number";
 
+    //member variables
     private int errorCode;
+
+    /**
+     * creates a new ErrorCodeType with a code
+     * @param code error code
+     */
     ErrorCodeType(int code) {
         errorCode = code;
     }
+
     /**
      * Return errror code corresponding to the error code number
      * @param errorCodeNum error code number to find
