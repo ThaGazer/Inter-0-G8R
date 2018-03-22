@@ -164,7 +164,7 @@ public class N4MMessage {
         if(start < 0 || end < start) {
             throw new IllegalArgumentException(errGetByteParams);
         }
-        if(end > bArr.length) {
+        if(start == bArr.length || end > bArr.length) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
         if(start == end) {
