@@ -65,7 +65,7 @@ public class N4MMessage {
         int errCode = b & errCodeMask;
 
         //MsgId
-        int msgId = getByte(readPos++, in);
+        int msgId = unsignByte(getByte(readPos++, in));
 
         switch(QRCode) {
             case 0:
@@ -137,7 +137,7 @@ public class N4MMessage {
         if(start < 0 || end < start) {
             throw new IllegalArgumentException(errGetByteParams);
         }
-        if(end > bArr.length) {
+        if(end >= bArr.length) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
         if(start == end) {
@@ -154,6 +154,18 @@ public class N4MMessage {
 
     protected static int unsignByte(byte b) {
         return (b & 0xff);
+    }
+
+    protected static long b2i(byte[] bInt) {
+        if(bInt == null) {
+            throw new NullPointerException(paramByteArr + errNullParam);
+        }
+
+        long integer = 0;
+        for(int i = bInt.length-1; i >= 0; i--) {
+            integer += unsignByte(bInt[i]) << 8*i;
+        }
+        return integer;
     }
 
     @Override

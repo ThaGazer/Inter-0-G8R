@@ -7,6 +7,9 @@
  */
 package N4M.serialization;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.TemporalField;
 import java.util.*;
 
 /**
@@ -45,7 +48,31 @@ public class N4MResponse extends N4MMessage {
     public static N4MResponse decode(int errCode, int msgId, byte[] in)
             throws N4MException {
 
-        return new N4MResponse(errCode, msgId, new Date(), new ArrayList<>());
+        int readPos = 0;
+
+        //timestamp
+        long time = b2i(getBytes(readPos, 4, in));
+        readPos += 4;
+
+        int appCount = unsignByte(getByte(readPos++, in));
+
+        List<ApplicationEntry> entries = new ArrayList<>();
+        for(int i = 0; i < appCount; i++) {
+            //application use count
+            int count = (int) b2i(getBytes(readPos, 2, in));
+            readPos += 2;
+
+            //length of application name in bytes
+            int nameLen = getByte(readPos++, in);
+
+            //application name
+            String name = new String(getBytes(readPos, readPos+nameLen, in),
+                    StandardCharsets.US_ASCII);
+
+            entries.add(new ApplicationEntry(name, count));
+        }
+
+        return new N4MResponse(errCode, msgId, new Date(time), entries);
     }
 
     @Override
@@ -88,7 +115,11 @@ public class N4MResponse extends N4MMessage {
      */
     public void setTimeStamp(Date timeStamp)
             throws N4MException, NullPointerException {
-        if(timeStamp.before(new Date(1970))) {
+        Calendar tomorrow = Calendar.getInstance();
+        tomorrow.add(Calendar.DATE, 1);
+
+        if(timeStamp.before(Date.from(Instant.EPOCH)) ||
+                timeStamp.after(tomorrow.getTime())) {
             throw new N4MException(errTime, ErrorCodeType.BADMSG);
         }
         responseTime.setTime(timeStamp.getTime());

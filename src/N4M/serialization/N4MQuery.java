@@ -7,6 +7,7 @@
  */
 package N4M.serialization;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -46,16 +47,18 @@ public class N4MQuery extends N4MMessage {
         }
 
         int readPos = 0;
+
+        //length of business name in bytes
         int nameLen = unsignByte(getByte(readPos, in));
 
+        //bounds check
         if(in.length < nameLen+1) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
 
-        String name = "";
-        for(int i = readPos; i < nameLen; i++) {
-            name += (char)getByte(i, in);
-        }
+        //business name
+        String name = new String(getBytes(readPos, readPos+nameLen, in),
+                StandardCharsets.US_ASCII);
 
         return new N4MQuery(msgId, name);
     }

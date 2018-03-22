@@ -7,7 +7,10 @@
  */
 package N4M.serialization;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import static N4M.serialization.N4MMessage.*;
 
 /**
  * Represents one application and its access count
@@ -20,7 +23,7 @@ public class ApplicationEntry {
     private final String alphaNum = "[\\w]+";
 
     private String applicationName;
-    private int count;
+    private int accessCount = 0;
 
     /**
      * Creates an empty application entry
@@ -51,23 +54,28 @@ public class ApplicationEntry {
         setAccessCount(accessCt);
     }
 
+    public byte[] encode() {
+        return new byte[]{};
+    }
+
     /**
      * Returns application access count
      * @return access count
      */
     public int getAccessCount() {
-        return count;
+        return accessCount;
     }
 
     /**
      * Set application access count
-     * @param accessCount access count
+     * @param count access count
      * @throws N4MException if validation fails
      */
-    public void setAccessCount(int accessCount) throws N4MException {
-        if(accessCount < 0) {
+    public void setAccessCount(int count) throws N4MException {
+        if(count < 0) {
             throw new N4MException(errCount, ErrorCodeType.BADMSG);
         }
+        accessCount = count;
     }
 
     /**
