@@ -11,17 +11,19 @@ import N4M.serialization.*;
 import java.io.IOException;
 import java.net.*;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class N4MClient {
 
     private static String errCommandParams = "Usage: <server ip/name> " +
             "<server port> <Business name>";
     private static String errHost = "could not connect to: ";
-    private static String errInit = "could not initialize ";
-    private static String causeSocket = "socket connection";
 
+    private static String fieldTime = "Timestamp: ";
+    private static String fieldId = "Message Id: ";
+    private static String fieldErrorCode = "Error code: ";
+    private static String fieldApplications = "Timestamp: ";
 
     private static int messageId = (int) (Math.random() * Integer.MAX_VALUE);
-    private static DatagramSocket soc;
 
     public static void main(String[] args) {
         if(args.length != 3) {
@@ -64,19 +66,23 @@ public class N4MClient {
             //print server response
             printResponse(message);
         } catch(N4MException n4me) {
-            System.err.println(n4me.getMessage());
+            n4me.printReason();
         } catch(IOException ioe) {
             ioe.printStackTrace();
         }
     }
 
+    /**
+     * prints a response message from the server
+     * @param message packet from server
+     */
     private static void printResponse(N4MMessage message) {
         N4MResponse res = (N4MResponse) message;
 
-        System.out.println(res.getTimeStamp());
-        System.out.println(res.getMsgId());
-        System.out.println(res.getErrorCodeNum());
-
+        System.out.println(fieldId + res.getMsgId());
+        System.out.println(fieldTime + res.getTimeStamp());
+        System.out.println(fieldErrorCode + res.getErrorCodeNum());
+        System.out.println(fieldApplications);
         for(ApplicationEntry ae : res.getApplications()) {
             System.out.println(ae);
         }

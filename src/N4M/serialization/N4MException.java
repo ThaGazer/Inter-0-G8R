@@ -12,6 +12,8 @@ package N4M.serialization;
  */
 public class N4MException extends Exception {
 
+    private static String msgWithError = " with error code ";
+
     private ErrorCodeType errorCodeType;
 
     /**
@@ -42,5 +44,13 @@ public class N4MException extends Exception {
      */
     public ErrorCodeType getErrorCodeType() {
         return errorCodeType;
+    }
+
+    /**
+     * prints stack trace along with the message and error code of exception
+     */
+    public void printReason() {
+        System.err.println(getMessage() + msgWithError + getErrorCodeType());
+        this.printStackTrace();
     }
 }
