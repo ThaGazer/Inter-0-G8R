@@ -32,7 +32,7 @@ public class testN4MResponse {
     @Test
     public void testSetTimeStep() throws N4MException {
         Date test = new Date();
-        r.setTimeStamp(test);
-        assertEquals(test, r.getTimeStamp());
+        r.setTimeStamp(test.getTime());
+        assertEquals(test.getTime(), r.getTimeStamp());
     }
 }

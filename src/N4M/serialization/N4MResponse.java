@@ -39,7 +39,7 @@ public class N4MResponse extends N4MMessage {
      * @throws N4MException if validation fails
      * @throws NullPointerException if timestamp or applications is null
      */
-    public N4MResponse(int errorCodeNum, int msgId, Date timeStamp,
+    public N4MResponse(int errorCodeNum, int msgId, long timeStamp,
                        List<ApplicationEntry> applications)
             throws N4MException, NullPointerException {
         setErrorCodeNum(errorCodeNum);
@@ -91,7 +91,7 @@ public class N4MResponse extends N4MMessage {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
 
-        return new N4MResponse(errCode, msgId, new Date(time), entries);
+        return new N4MResponse(errCode, msgId, time, entries);
     }
 
     /**
@@ -115,7 +115,7 @@ public class N4MResponse extends N4MMessage {
             ret.write(header);
 
             //Timestamp
-            ret.write(i2b((int) getTimeStamp().getTime()));
+            ret.write(i2b((int) getTimeStamp()));
 
             //ApplicationsCount
             ret.write((byte) getApplications().size());
@@ -143,8 +143,8 @@ public class N4MResponse extends N4MMessage {
      * Returns timestamp
      * @return timestamp
      */
-    public Date getTimeStamp() {
-        return (Date) responseTime.clone();
+    public long getTimeStamp() {
+        return responseTime.getTime();
     }
 
     /**
@@ -163,16 +163,17 @@ public class N4MResponse extends N4MMessage {
      * @throws N4MException if validation fails
      * @throws NullPointerException if timestamp is null
      */
-    public void setTimeStamp(Date timeStamp)
+    public void setTimeStamp(long timeStamp)
             throws N4MException, NullPointerException {
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DATE, 1);
 
-        if(timeStamp.before(Date.from(Instant.EPOCH)) ||
-                timeStamp.after(tomorrow.getTime())) {
+        Date timeCheck = new Date(timeStamp);
+        if(timeCheck.before(Date.from(Instant.EPOCH)) ||
+                timeCheck.after(tomorrow.getTime())) {
             throw new N4MException(errTime, ErrorCodeType.BADMSG);
         }
-        responseTime.setTime(timeStamp.getTime());
+        responseTime.setTime(timeStamp);
     }
 
     @Override
