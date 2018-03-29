@@ -21,9 +21,9 @@ public class N4MClient {
     private static String fieldTime = "Timestamp: ";
     private static String fieldId = "Message Id: ";
     private static String fieldErrorCode = "Error code: ";
-    private static String fieldApplications = "Timestamp: ";
+    private static String fieldApplications = "Applications: ";
 
-    private static int messageId = (int) (Math.random() * Integer.MAX_VALUE);
+    private static int messageId = (int) (Math.random() * 255);
 
     public static void main(String[] args) {
         if(args.length != 3) {
@@ -47,6 +47,7 @@ public class N4MClient {
         N4MQuery clientAsks;
         try(DatagramSocket soc = new DatagramSocket()) {
             DatagramPacket packet;
+            int maxPacketSize = soc.getReceiveBufferSize()-20;
 
             //create client message
             clientAsks = new N4MQuery(messageId, businessName);
@@ -58,6 +59,7 @@ public class N4MClient {
             soc.send(packet);
 
             //receive from server
+            packet = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
             soc.receive(packet);
 
             //decode message from server
@@ -73,18 +75,20 @@ public class N4MClient {
     }
 
     /**
-     * prints a response message from the server
+     * prints a response message from the server if it matches the clients Id
      * @param message packet from server
      */
     private static void printResponse(N4MMessage message) {
-        N4MResponse res = (N4MResponse) message;
+        if (messageId == message.getMsgId()) {
+            N4MResponse res = (N4MResponse) message;
 
-        System.out.println(fieldId + res.getMsgId());
-        System.out.println(fieldTime + res.getTimeStamp());
-        System.out.println(fieldErrorCode + res.getErrorCodeNum());
-        System.out.println(fieldApplications);
-        for(ApplicationEntry ae : res.getApplications()) {
-            System.out.println(ae);
+            System.out.println(fieldId + res.getMsgId());
+            System.out.println(fieldTime + res.getTimeStamp());
+            System.out.println(fieldErrorCode + res.getErrorCodeNum());
+            System.out.println(fieldApplications);
+            for (ApplicationEntry ae : res.getApplications()) {
+                System.out.println(ae);
+            }
         }
     }
 }

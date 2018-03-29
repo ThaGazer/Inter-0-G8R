@@ -87,10 +87,6 @@ public class N4MResponse extends N4MMessage {
             entries.add(new ApplicationEntry(name, count));
         }
 
-        if(readPos < in.length) {
-            throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
-        }
-
         return new N4MResponse(errCode, msgId, time, entries);
     }
 
