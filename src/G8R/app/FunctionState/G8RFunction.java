@@ -14,10 +14,6 @@ import G8R.serialization.ValidationException;
 import java.io.IOException;
 
 public interface G8RFunction {
-    default Enum<?> first() {
-        return null;
-    }
-
     default Enum<?> last() {
         return null;
     }

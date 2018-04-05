@@ -11,7 +11,6 @@ import N4M.serialization.*;
 import java.io.IOException;
 import java.net.*;
 
-@SuppressWarnings("FieldCanBeLocal")
 public class N4MClient {
 
     private static String errCommandParams = "Usage: <server ip/name> " +

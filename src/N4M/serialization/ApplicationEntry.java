@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 
 import static N4M.serialization.N4MMessage.*;
@@ -26,6 +27,8 @@ public class ApplicationEntry {
 
     //string parsing
     private final String alphaNum = "[\\w]+";
+
+    private final int MAXCOUNT = (int)(Math.pow(2, 16)-1);
 
     //member variables
     private String applicationName;
@@ -94,7 +97,7 @@ public class ApplicationEntry {
      * @throws N4MException if validation fails
      */
     public void setAccessCount(int count) throws N4MException {
-        if(count < 0) {
+        if(count < 0 || count > MAXCOUNT) {
             throw new N4MException(errCount, ErrorCodeType.BADMSG);
         }
         accessCount = count;

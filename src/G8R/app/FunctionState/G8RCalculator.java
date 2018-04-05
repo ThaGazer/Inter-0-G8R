@@ -81,7 +81,7 @@ public enum G8RCalculator implements G8RFunction {
         name = str;
     }
 
-    public G8RCalculator first() {
+    public static G8RCalculator first() {
         return MATH;
     }
 

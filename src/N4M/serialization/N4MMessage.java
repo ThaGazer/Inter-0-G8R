@@ -24,9 +24,6 @@ public class N4MMessage {
     //parameter types
     protected static final String paramByteArr = "byte array";
 
-    //string parsing
-    protected static final String alphaNum = "[\\w]+";
-
     //packet masks
     private static final int messageHeaderLen = 2;
     private static final byte versionMask = (byte)0xf0;
@@ -35,8 +32,8 @@ public class N4MMessage {
 
     //member variables
     private static final byte version = 0x02;
-    private ErrorCodeType errorCode;
-    private int messageId;
+    protected ErrorCodeType errorCode;
+    protected int messageId;
 
     /**
      * Creates a new N4M message by deserializing from the given byte array
@@ -74,10 +71,11 @@ public class N4MMessage {
 
         switch(qrCode) {
             case 0:
-                return N4MQuery.decode(msgId, getBytes(readPos, in.length, in));
+                return N4MQuery.decode
+                        (msgId, errCode, getBytes(readPos, in.length-2, in));
             case 1:
                 return N4MResponse.decode(errCode, msgId,
-                        getBytes(readPos, in.length, in));
+                        getBytes(readPos, in.length-2, in));
             default:
                 throw new N4MException(errMsgType,
                         ErrorCodeType.INCORRECTHEADER);
@@ -145,35 +143,35 @@ public class N4MMessage {
      */
     protected static byte getByte(int pos, byte[] bArr)
             throws N4MException {
-        return getBytes(pos, pos, bArr)[0];
+        return getBytes(pos, 0, bArr)[0];
     }
 
     /**
      * creates a new byte array of size end-start
-     * @param start starting position of new array
-     * @param end end position of new array
+     * @param offSet starting position to read from
+     * @param length amount to read
      * @param bArr original array
      * @return new byte array
      * @throws N4MException params are out of bounds of the byte array
      */
-    protected static byte[] getBytes(int start, int end, byte[] bArr)
+    protected static byte[] getBytes(int offSet, int length, byte[] bArr)
             throws N4MException {
         if(bArr == null) {
             throw new NullPointerException(paramByteArr + errNullParam);
         }
-        if(start < 0 || end < start) {
+        if(offSet < 0 || length > bArr.length) {
             throw new IllegalArgumentException(errGetByteParams);
         }
-        if(start == bArr.length || end > bArr.length) {
+        if(offSet >= bArr.length || length+offSet > bArr.length) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
-        if(start == end) {
-            return new byte[]{bArr[start]};
+        if(length == 0) {
+            return new byte[]{bArr[offSet]};
         }
 
-        byte[] ret = new byte[end-start];
+        byte[] ret = new byte[length];
         int j = 0;
-        for(int i = start; i < end; i++, j++) {
+        for(int i = offSet; j < length; i++, j++) {
             ret[j] = bArr[i];
         }
         return ret;

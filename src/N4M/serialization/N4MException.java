@@ -53,4 +53,8 @@ public class N4MException extends Exception {
         System.err.println(getMessage() + msgWithError + getErrorCodeType());
         this.printStackTrace();
     }
+
+    public String getReason() {
+        return getMessage() + " with error code " + getErrorCodeType();
+    }
 }

@@ -10,9 +10,13 @@ package G8R.app;
 import G8R.app.FunctionState.G8RFunction;
 import G8R.app.FunctionState.G8RFunctionFactory;
 import G8R.serialization.*;
+import N4M.serialization.ApplicationEntry;
+import N4M.serialization.N4MException;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.*;
 
@@ -22,6 +26,7 @@ public class G8RClientHandler implements Runnable {
     private static final String errFunction = "Unexpected function";
 
     //messages to client
+    private static final String msgG8R = "G8R ";
     private static final String msgConnection = "connected to: ";
     private static final String msgCloseConnect = "closed connection to: ";
     private static final String msgClientClose = " ***client terminated";
@@ -29,6 +34,7 @@ public class G8RClientHandler implements Runnable {
     private static final String LOGGERNAME = G8RServer.class.getName();
 
     //class variables
+    private ArrayList<ApplicationEntry> appList;
     private Socket client;
     private Logger logger = Logger.getLogger(LOGGERNAME);
 
@@ -36,7 +42,9 @@ public class G8RClientHandler implements Runnable {
      * creates a new clientHandler runnable
      * @param socket the client connection
      */
-    public G8RClientHandler(Socket socket) throws SocketException {
+    public G8RClientHandler(Socket socket, ArrayList<ApplicationEntry> list)
+            throws SocketException {
+        appList = list;
         client = Objects.requireNonNull(socket);
         client.setSoTimeout(20000);
     }
@@ -44,22 +52,22 @@ public class G8RClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            logger.info(msgConnection + client.getLocalSocketAddress());
+            logger.info(msgG8R + msgConnection +
+                    client.getLocalSocketAddress());
 
             MessageInput in = new MessageInput(client.getInputStream());
             MessageOutput out = new MessageOutput(client.getOutputStream());
 
             G8RMessage mess = G8RMessage.decode(in);
             Enum e = G8RFunctionFactory.getByName(mess.getFunction());
+            incrementApp(e);
 
             if(e != null) {
-                while (e != ((G8RFunction)e).last()) {
-                    e = handleRequest(mess, e, out);
+                while((e = handleRequest(mess, e, out)) !=
+                        ((G8RFunction)e).last()) {
                     logger.log(Level.INFO, buildConnection(mess, false), mess);
 
-                    if(e != ((G8RFunction)e).last()) {
-                        mess = G8RMessage.decode(in);
-                    }
+                    mess = G8RMessage.decode(in);
                 }
             } else {
                 mess = new G8RResponse(G8RResponse.type_ERROR, "NULL",
@@ -69,16 +77,27 @@ public class G8RClientHandler implements Runnable {
             }
 
             client.close();
-            logger.info(msgCloseConnect + client.getLocalSocketAddress());
+            logger.info(msgG8R + msgCloseConnect +
+                    client.getLocalSocketAddress());
         } catch(ValidationException ve) {
-            logger.severe(ve.getReason() + msgClientClose);
+            logger.severe(msgG8R + ve.getReason() + msgClientClose);
         } catch(IOException e) {
-            logger.warning(e.getMessage() + msgClientClose);
+            logger.warning(msgG8R + e.getMessage() + msgClientClose);
         } finally {
             try {
                 client.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private void incrementApp(Enum funct) {
+        for (ApplicationEntry ae : appList) {
+            if(ae.getApplicationName().equals(((G8RFunction)funct).getName())) {
+                try {
+                    ae.setAccessCount(ae.getAccessCount() + 1);
+                } catch (N4MException ignored) {}
             }
         }
     }
@@ -108,16 +127,16 @@ public class G8RClientHandler implements Runnable {
     /**
      * builds the logging message for a connection
      * @param message the message sent or received
-     * @param sentOrReceiv which message to build (sent or received)
+     * @param sentOrReceive which message to build (sent or received)
      * @return string representation of connection message
      */
-    private String buildConnection(G8RMessage message, boolean sentOrReceiv) {
-        if(sentOrReceiv) {
-            return client.getLocalSocketAddress() + "-" + Thread.currentThread()
-                    + " [Received:" + message + "]";
+    private String buildConnection(G8RMessage message, boolean sentOrReceive) {
+        if(sentOrReceive) {
+            return msgG8R + client.getLocalSocketAddress() + "-" +
+                    Thread.currentThread() + " [Received:" + message + "]";
         } else {
-            return client.getLocalSocketAddress() + "-" + Thread.currentThread()
-                    + " [Sent:" + message + "]";
+            return msgG8R + client.getLocalSocketAddress() + "-" +
+                    Thread.currentThread() + " [Sent:" + message + "]";
         }
     }
 }

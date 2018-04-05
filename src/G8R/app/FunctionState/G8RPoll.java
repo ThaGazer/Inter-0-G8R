@@ -55,7 +55,7 @@ public enum G8RPoll implements G8RFunction {
         name = str;
     }
 
-    public G8RPoll first() {
+    public static  G8RPoll first() {
         return POLL;
     }
 

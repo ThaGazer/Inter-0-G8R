@@ -8,9 +8,18 @@
 package G8R.app;
 
 
+import G8R.app.FunctionState.G8RFunctionFactory;
+import N4M.app.N4MClientHandler;
+import N4M.serialization.ApplicationEntry;
+import N4M.serialization.N4MException;
+
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
@@ -18,54 +27,51 @@ import java.util.logging.*;
 public class G8RServer {
 
     //private static final String LOGGERCONFIG = "./logs/.properties";
-    private static final String LOGGERNAME = G8RServer.class.getName();
-    private static final String LOGGERFILE = "./logs/connections.log";
+    private static final String LOGNAME = G8RServer.class.getName();
+    private static final String G8RLOGFILE = "./logs/connections.log";
+    private static final String N4MLOGFILE = "./logs/n4m.log";
 
     private static final String errParams =
             "Usage: <server port> <thread count>";
-    private static final String errCrash = "Server crashed";
+    private static final String errG8RCrash = "G8R Server crashed";
+    private static final String errN4MCrash = "N4M Server crashed";
 
     private static final String msgServerStart = "Server started on port: ";
-    private static final String msgServerEnd = "Server closed";
-
-    private static final int server_Timeout = 20000;
+    private static final String msgG8RServerEnd = "G8R Server closed";
+    private static final String msgN4MServerEnd = "N4M Server closed";
+    private static final String msgG8R = "G8R ";
+    private static final String msgN4M = "N4M ";
 
     private static Logger logger = null;
+    private static ArrayList<ApplicationEntry> appList = new ArrayList<>();
+    private static ArrayList<Thread> threadList = new ArrayList<>();
+    private static int servPort;
+    private static int numThread;
+    private static long lastAccess;
 
     /**
      * sends and receives messages from multiple clients
      * @param argv arguments to passed to server
      * @throws IOException if I/O problem
      */
-    public static void main(String[] argv) throws IOException {
+    public static void main(String[] argv) throws IOException, N4MException {
         if(argv.length != 2) {
             throw new IllegalArgumentException(errParams);
         }
 
-        int servPort = Integer.parseInt(argv[0]);
-        int numThread = Integer.parseInt(argv[1]);
-
-        ExecutorService pool = Executors.newFixedThreadPool(numThread);
+        servPort = Integer.parseInt(argv[0]);
+        numThread = Integer.parseInt(argv[1]);
 
         //initializes logger
         setup_logger();
+        setup_applicationList();
 
-        try(ServerSocket server = new ServerSocket(servPort)) {
-            setup_Server(server);
-            logger.info(msgServerStart + server.getLocalPort());
-
-            while(true) {
-                pool.execute(new G8RClientHandler(server.accept()));
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, errCrash, e);
-        } finally {
-            logger.log(Level.INFO, msgServerEnd);
-        }
+        handle_G8R();
+        handle_N4M();
     }
 
     /**
-     * sets up the configureation of tbe server
+     * sets up the configuration of tbe server
      * @param server the server connection
      * @throws SocketException if socket problem
      */
@@ -86,19 +92,84 @@ public class G8RServer {
         manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
 
         //initializes the logger
-        logger = Logger.getLogger(LOGGERNAME);
+        logger = Logger.getLogger(LOGNAME);
 
         //defines handles for the logger
-        Handler fileHand = new FileHandler(LOGGERFILE);
+        Handler fileHand1 = new FileHandler(G8RLOGFILE);
+        Handler fileHand2 = new FileHandler(N4MLOGFILE);
         Handler consoleHand = new ConsoleHandler();
 
-        fileHand.setLevel(Level.ALL);
+        //filters
+        fileHand1.setFilter(record -> record.getMessage().contains(msgG8R));
+        fileHand2.setFilter(record -> record.getMessage().contains(msgN4M));
+
+        fileHand1.setLevel(Level.ALL);
+        fileHand2.setLevel(Level.ALL);
         consoleHand.setLevel(Level.INFO);
 
         //sets the formatting style of the logs
         consoleHand.setFormatter(new SimpleFormatter());
 
-        logger.addHandler(fileHand);
+        logger.addHandler(fileHand1);
+        logger.addHandler(fileHand2);
         logger.addHandler(consoleHand);
+    }
+
+    private static void setup_applicationList() throws N4MException {
+        appList.addAll(G8RFunctionFactory.values());
+    }
+
+    private static void handle_G8R() {
+        Thread t = new Thread(() -> {
+            ExecutorService pool = Executors.newFixedThreadPool(numThread);
+
+            try(ServerSocket servTCP = new ServerSocket(servPort)) {
+                setup_Server(servTCP);
+                logger.info(msgG8R + msgServerStart + servTCP.getLocalPort());
+
+                //G8RClients
+                while (true) {
+                    pool.execute(new G8RClientHandler(servTCP.accept(),
+                            appList));
+                    lastAccess = new Date().getTime();
+                }
+            } catch(Exception e) {
+                logger.log(Level.SEVERE, msgG8R + errG8RCrash, e);
+            } finally {
+                logger.log(Level.INFO, msgG8R + msgG8RServerEnd);
+            }
+        });
+        threadList.add(t);
+        t.start();
+    }
+
+    private static void handle_N4M() {
+        Thread t = new Thread(() -> {
+            try(DatagramSocket servUDP = new DatagramSocket(servPort)) {
+                int maxPacketSize = servUDP.getReceiveBufferSize()-20;
+
+                while(true) {
+                    try {
+                        DatagramPacket p = new DatagramPacket
+                                (new byte[maxPacketSize], maxPacketSize);
+
+                        servUDP.receive(p);
+                        N4MClientHandler handler =
+                                new N4MClientHandler(p, appList, lastAccess);
+
+                        p.setData(handler.response());
+                        servUDP.send(p);
+                    } catch(IOException ioe) {
+                        logger.warning(msgN4M + ioe.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, msgN4M + errN4MCrash, e);
+            } finally {
+                logger.info(msgN4M + msgN4MServerEnd);
+            }
+        });
+        threadList.add(t);
+        t.start();
     }
 }

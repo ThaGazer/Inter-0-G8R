@@ -21,6 +21,8 @@ public class N4MQuery extends N4MMessage {
     private static final String errBusinessName = "invalid business name";
     private static final String errNullName = "null business name";
 
+    protected static final String alphaNumWSpace = "[\\w ]+";
+
     private String queryBusinessName;
 
     /**
@@ -37,8 +39,13 @@ public class N4MQuery extends N4MMessage {
      */
     public N4MQuery(int msgId, String businessName)
             throws N4MException, NullPointerException {
-        setErrorCodeNum(0);
+        this(msgId, 0, businessName);
+    }
+
+    public N4MQuery(int msgId, int errCode, String businessName)
+            throws N4MException, NullPointerException {
         setMsgId(msgId);
+        setErrorCodeNum(errCode);
         setBusinessName(businessName);
     }
 
@@ -49,7 +56,7 @@ public class N4MQuery extends N4MMessage {
      * @return query message
      * @throws N4MException if validation fails
      */
-    public static N4MQuery decode(int msgId, byte[] in)
+    public static N4MQuery decode(int msgId, int errCode, byte[] in)
             throws N4MException {
         if(in == null) {
             throw new NullPointerException(paramByteArr + errNullParam);
@@ -61,15 +68,15 @@ public class N4MQuery extends N4MMessage {
         int nameLen = unsignByte(getByte(readPos++, in));
 
         //bounds check
-        if(nameLen+1 != in.length) {
+        if(nameLen+1 > in.length) {
             throw new N4MException(errFrameSize, ErrorCodeType.BADMSGSIZE);
         }
 
         //business name
-        String name = new String(getBytes(readPos, readPos+nameLen, in),
+        String name = new String(getBytes(readPos, nameLen, in),
                 StandardCharsets.US_ASCII);
 
-        return new N4MQuery(msgId, name);
+        return new N4MQuery(msgId, errCode, name);
     }
 
     /**
@@ -116,7 +123,7 @@ public class N4MQuery extends N4MMessage {
      */
     public void setBusinessName(String businessName)
             throws N4MException, NullPointerException {
-        if(!businessName.matches(alphaNum)) {
+        if(!businessName.matches(alphaNumWSpace)) {
             throw new N4MException(errBusinessName, ErrorCodeType.BADMSG);
         }
         queryBusinessName = Objects.requireNonNull(businessName, errNullName);
@@ -130,7 +137,7 @@ public class N4MQuery extends N4MMessage {
     @Override
     public void setErrorCodeNum(int errorCodeNum) throws N4MException {
         if(errorCodeNum != 0) {
-            throw new N4MException(errErrCode, ErrorCodeType.INCORRECTHEADER);
+            throw new N4MException(errErrCode, ErrorCodeType.BADMSG);
         }
         super.setErrorCodeNum(errorCodeNum);
     }

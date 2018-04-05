@@ -28,7 +28,11 @@ public class N4MResponse extends N4MMessage {
     /**
      * Creates new empty N4M response
      */
-    public N4MResponse() {}
+    public N4MResponse() {
+        messageId = 0;
+        errorCode = ErrorCodeType.SERVERERROR;
+        responseTime = new Date(0L);
+    }
 
     /**
      * Creates a new N4M request using given values
@@ -62,7 +66,7 @@ public class N4MResponse extends N4MMessage {
         int readPos = 0;
 
         //timestamp
-        long time = b2i(getBytes(readPos, readPos+4, in));
+        long time = b2i(getBytes(readPos, 4, in)) & 0x7FFFFFFF;
         readPos += 4;
 
         int appCount = unsignByte(getByte(readPos++, in));
@@ -70,7 +74,7 @@ public class N4MResponse extends N4MMessage {
         List<ApplicationEntry> entries = new ArrayList<>();
         for(int i = 0; i < appCount; i++) {
             //application use count
-            int count = (int) b2i(getBytes(readPos, readPos+2, in));
+            int count = (int) b2i(getBytes(readPos, 2, in));
             readPos += 2;
 
             //length of application name in bytes
@@ -79,7 +83,7 @@ public class N4MResponse extends N4MMessage {
             //application name
             String name = "";
             if(nameLen != 0) {
-                name = new String(getBytes(readPos, readPos+nameLen, in),
+                name = new String(getBytes(readPos, nameLen, in),
                         StandardCharsets.US_ASCII);
             }
             readPos += nameLen;
@@ -111,7 +115,8 @@ public class N4MResponse extends N4MMessage {
             ret.write(header);
 
             //Timestamp
-            ret.write(i2b((int) getTimeStamp()));
+            int i = (int) getTimeStamp();
+            ret.write(i2b(i));
 
             //ApplicationsCount
             ret.write((byte) getApplications().size());
