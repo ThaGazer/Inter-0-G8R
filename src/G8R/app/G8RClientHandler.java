@@ -60,9 +60,9 @@ public class G8RClientHandler implements Runnable {
 
             G8RMessage mess = G8RMessage.decode(in);
             Enum e = G8RFunctionFactory.getByName(mess.getFunction());
-            incrementApp(e);
 
             if(e != null) {
+                incrementApp(e);
                 while((e = handleRequest(mess, e, out)) !=
                         ((G8RFunction)e).last()) {
                     logger.log(Level.INFO, buildConnection(mess, false), mess);
