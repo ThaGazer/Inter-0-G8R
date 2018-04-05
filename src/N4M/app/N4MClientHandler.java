@@ -35,10 +35,18 @@ public class N4MClientHandler {
         appList.addAll(list);
     }
 
+    /**
+     * sets a datagram packet
+     * @param packet packet to set
+     */
     private void setPacket(DatagramPacket packet) {
         pack = Objects.requireNonNull(packet);
     }
 
+    /**
+     * operates off of message from client
+     * @return byte[] of encoded message
+     */
     public byte[] response() {
         N4MQuery message;
         try {
@@ -62,11 +70,22 @@ public class N4MClientHandler {
         }
     }
 
+    /**
+     * sends byte[] to client
+     * @param res message to client
+     * @return byte[] of message
+     */
     private byte[] sendResponse(N4MResponse res) {
         logger.info(buildLogMsg(res, false));
         return res.encode();
     }
 
+    /**
+     * builds a message based on if sending or receiving a message
+     * @param message message to build on
+     * @param sentOrReceive sending or receiving
+     * @return built message
+     */
     private String buildLogMsg(N4MMessage message, boolean sentOrReceive) {
         if(sentOrReceive) {
             return msgN4M + "[Receive:From=" +

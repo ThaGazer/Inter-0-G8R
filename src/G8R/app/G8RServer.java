@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
 public class G8RServer {
@@ -33,8 +34,7 @@ public class G8RServer {
 
     private static final String errParams =
             "Usage: <server port> <thread count>";
-    private static final String errG8RCrash = "G8R Server crashed";
-    private static final String errN4MCrash = "N4M Server crashed";
+    private static final String errServerCrash = "Server crashed";
 
     private static final String msgServerStart = "Server started on port: ";
     private static final String msgG8RServerEnd = "G8R Server closed";
@@ -115,10 +115,17 @@ public class G8RServer {
         logger.addHandler(consoleHand);
     }
 
+    /**
+     * creates an application list of all applications
+     * @throws N4MException is could not get application
+     */
     private static void setup_applicationList() throws N4MException {
         appList.addAll(G8RFunctionFactory.values());
     }
 
+    /**
+     * handles a G8R request
+     */
     private static void handle_G8R() {
         Thread t = new Thread(() -> {
             ExecutorService pool = Executors.newFixedThreadPool(numThread);
@@ -131,10 +138,11 @@ public class G8RServer {
                 while (true) {
                     pool.execute(new G8RClientHandler(servTCP.accept(),
                             appList));
-                    lastAccess = new Date().getTime();
+                    lastAccess = TimeUnit.MILLISECONDS.toSeconds
+                            (new Date().getTime());
                 }
             } catch(Exception e) {
-                logger.log(Level.SEVERE, msgG8R + errG8RCrash, e);
+                logger.log(Level.SEVERE, msgG8R + errServerCrash, e);
             } finally {
                 logger.log(Level.INFO, msgG8R + msgG8RServerEnd);
             }
@@ -143,6 +151,9 @@ public class G8RServer {
         t.start();
     }
 
+    /**
+     * handles a N4M request
+     */
     private static void handle_N4M() {
         Thread t = new Thread(() -> {
             try(DatagramSocket servUDP = new DatagramSocket(servPort)) {
@@ -164,7 +175,7 @@ public class G8RServer {
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, msgN4M + errN4MCrash, e);
+                logger.log(Level.SEVERE, msgN4M + errServerCrash, e);
             } finally {
                 logger.info(msgN4M + msgN4MServerEnd);
             }

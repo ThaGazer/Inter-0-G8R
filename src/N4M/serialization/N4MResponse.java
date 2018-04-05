@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents an N4M response and provides serialization/deserialization
@@ -141,11 +142,11 @@ public class N4MResponse extends N4MMessage {
     }
 
     /**
-     * Returns timestamp
+     * Returns timestamp in seconds
      * @return timestamp
      */
     public long getTimeStamp() {
-        return responseTime.getTime();
+        return (responseTime.getTime()/1000);
     }
 
     /**
@@ -160,7 +161,7 @@ public class N4MResponse extends N4MMessage {
 
     /**
      * Sets the timestamp
-     * @param timeStamp response timestamp
+     * @param timeStamp response timestamp in seconds
      * @throws N4MException if validation fails
      * @throws NullPointerException if timestamp is null
      */
@@ -169,7 +170,7 @@ public class N4MResponse extends N4MMessage {
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DATE, 1);
 
-        Date timeCheck = new Date(timeStamp);
+        Date timeCheck = new Date(TimeUnit.SECONDS.toMillis(timeStamp));
         if(timeCheck.before(Date.from(Instant.EPOCH)) ||
                 timeCheck.after(tomorrow.getTime())) {
             throw new N4MException(errTime, ErrorCodeType.BADMSG);
