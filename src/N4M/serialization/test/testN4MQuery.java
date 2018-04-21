@@ -9,6 +9,8 @@ package N4M.serialization.test;
 
 import N4M.serialization.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,17 +18,20 @@ public class testN4MQuery {
 
     private N4MQuery q = new N4MQuery();
 
-    @Test
-    public void testSetBusinessName() throws N4MException {
-        String testName = "test";
+    @ParameterizedTest
+    @CsvSource({"test", "''", "' '", "test 1", "test1",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    })
+    public void testSetBusinessName(String testName) throws N4MException {
         q.setBusinessName(testName);
         assertEquals(testName, q.getBusinessName());
     }
 
     @Test
     public void testErrorCodeNum() throws N4MException {
-        int testCode = 0;
-        q.setErrorCodeNum(testCode);
-        assertEquals(testCode, q.getErrorCodeNum());
+        ErrorCodeType testCode = ErrorCodeType.NOERROR;
+        q.setErrorCode(testCode);
+        assertEquals(testCode.getErrorCodeNum(),
+                q.getErrorCode().getErrorCodeNum());
     }
 }

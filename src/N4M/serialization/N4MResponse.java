@@ -21,6 +21,8 @@ public class N4MResponse extends N4MMessage {
 
     //error messages
     private static final String errTime = "invalid timestamp";
+    private static final String errLongTime = "timestamp is too large";
+    private static final String errList = "application list is too large";
 
     //member variables
     private Date responseTime = new Date();
@@ -31,25 +33,25 @@ public class N4MResponse extends N4MMessage {
      */
     public N4MResponse() {
         messageId = 0;
-        errorCode = ErrorCodeType.SERVERERROR;
+        errorCode = ErrorCodeType.NOERROR;
         responseTime = new Date(0L);
     }
 
     /**
      * Creates a new N4M request using given values
-     * @param errorCodeNum error number
+     * @param ect error number
      * @param msgId message id
      * @param timeStamp timestamp
      * @param applications list of applications
      * @throws N4MException if validation fails
      * @throws NullPointerException if timestamp or applications is null
      */
-    public N4MResponse(int errorCodeNum, int msgId, long timeStamp,
+    public N4MResponse(ErrorCodeType ect, int msgId, long timeStamp,
                        List<ApplicationEntry> applications)
             throws N4MException, NullPointerException {
-        setErrorCodeNum(errorCodeNum);
+        setErrorCode(ect);
         setMsgId(msgId);
-        setTimeStamp(timeStamp);
+        setTimestamp(timeStamp);
         setApplications(applications);
     }
 
@@ -61,13 +63,13 @@ public class N4MResponse extends N4MMessage {
      * @return response message
      * @throws N4MException if validations fails
      */
-    public static N4MResponse decode(int errCode, int msgId, byte[] in)
+    public static N4MResponse decode(ErrorCodeType errCode,
+                                     int msgId, byte[] in)
             throws N4MException {
-
         int readPos = 0;
 
         //timestamp
-        long time = b2i(getBytes(readPos, 4, in)) & 0x7FFFFFFF;
+        long time = b2i(getBytes(readPos, 4, in));
         readPos += 4;
 
         int appCount = unsignByte(getByte(readPos++, in));
@@ -79,7 +81,7 @@ public class N4MResponse extends N4MMessage {
             readPos += 2;
 
             //length of application name in bytes
-            int nameLen = getByte(readPos++, in);
+            int nameLen = unsignByte(getByte(readPos++, in));
 
             //application name
             String name = "";
@@ -111,12 +113,12 @@ public class N4MResponse extends N4MMessage {
             header[0] |= (0x08);
 
             //set errorCode
-            header[0] |= (getErrorCodeNum() & 0x07);
+            header[0] |= (getErrorCode().getErrorCodeNum() & 0x07);
 
             ret.write(header);
 
             //Timestamp
-            int i = (int) getTimeStamp();
+            int i = (int) (getTimestamp());
             ret.write(i2b(i));
 
             //ApplicationsCount
@@ -142,11 +144,11 @@ public class N4MResponse extends N4MMessage {
     }
 
     /**
-     * Returns timestamp in seconds
+     * Returns timestamp in milliseconds
      * @return timestamp
      */
-    public long getTimeStamp() {
-        return (responseTime.getTime()/1000);
+    public long getTimestamp() {
+        return responseTime.getTime()/1000;
     }
 
     /**
@@ -155,7 +157,10 @@ public class N4MResponse extends N4MMessage {
      * @throws NullPointerException if applications are null
      */
     public void setApplications(List<ApplicationEntry> applications)
-            throws NullPointerException {
+            throws NullPointerException, N4MException {
+        if(applications.size() > MAXID) {
+            throw new N4MException(errList, ErrorCodeType.BADMSG);
+        }
         responseApplications.addAll(applications);
     }
 
@@ -165,22 +170,24 @@ public class N4MResponse extends N4MMessage {
      * @throws N4MException if validation fails
      * @throws NullPointerException if timestamp is null
      */
-    public void setTimeStamp(long timeStamp)
+    public void setTimestamp(long timeStamp)
             throws N4MException, NullPointerException {
-        Calendar tomorrow = Calendar.getInstance();
-        tomorrow.add(Calendar.DATE, 1);
+        if(timeStamp > 0xffffffffL) {
+            throw new N4MException(errLongTime, ErrorCodeType.BADMSG);
+        }
 
-        Date timeCheck = new Date(TimeUnit.SECONDS.toMillis(timeStamp));
-        if(timeCheck.before(Date.from(Instant.EPOCH)) ||
-                timeCheck.after(tomorrow.getTime())) {
+        long timestamp_Milli = TimeUnit.SECONDS.toMillis(timeStamp);
+        Date timeCheck = new Date(timestamp_Milli);
+        if(timeCheck.before(Date.from(Instant.EPOCH))) {
             throw new N4MException(errTime, ErrorCodeType.BADMSG);
         }
-        responseTime.setTime(timeStamp);
+        responseTime.setTime(timestamp_Milli);
     }
 
     @Override
     public int hashCode() {
-        return responseTime.hashCode() + responseApplications.hashCode();
+        return super.hashCode() + responseTime.hashCode() +
+                responseApplications.hashCode();
     }
 
     @Override
@@ -188,13 +195,14 @@ public class N4MResponse extends N4MMessage {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
         N4MResponse that = (N4MResponse)obj;
-        return responseApplications.equals(that.responseApplications) &&
-            responseTime.equals(that.responseTime);
+        return super.equals(that) &&
+                responseApplications.equals(that.responseApplications) &&
+                responseTime.equals(that.responseTime);
     }
 
     @Override
     public String toString() {
-        String msg = super.toString() + "Date=" + getTimeStamp() +
+        String msg = super.toString() + "Date=" + getTimestamp() +
                 "Applications=";
 
         boolean first = true;

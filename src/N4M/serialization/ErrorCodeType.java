@@ -18,7 +18,7 @@ public enum ErrorCodeType {
     public static final ErrorCodeType BADMSGSIZE = BMS;
     public static final ErrorCodeType INCORRECTHEADER = IH;
     public static final ErrorCodeType NOERROR = NE;
-    public static final ErrorCodeType SERVERERROR = SR;
+    public static final ErrorCodeType SYSTEMERROR = SR;
 
     //error messages
     private static final String errNum = "invalid error code number";
@@ -51,7 +51,7 @@ public enum ErrorCodeType {
             case 3:
                 return BADMSG;
             case 4:
-                return SERVERERROR;
+                return SYSTEMERROR;
             default:
                 throw new N4MException(errNum, INCORRECTHEADER);
         }

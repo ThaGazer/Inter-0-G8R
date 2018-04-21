@@ -20,6 +20,7 @@ public class N4MMessage {
     private static final String errMsgType = "unexpected message type";
     protected static final String errFrameSize = "incorrect frame sizing";
     protected static final String errNullParam = " cannot be null";
+    protected static final String errNullError = "null error code";
 
     //parameter types
     protected static final String paramByteArr = "byte array";
@@ -29,6 +30,13 @@ public class N4MMessage {
     private static final byte versionMask = (byte)0xf0;
     private static final byte qrMask = 0x08;
     private static final byte errCodeMask = 0x07;
+
+    //max variables
+    protected static final int MAXID = (int)Math.pow(2, 8)-1;
+    protected static final int MAXNAME = (int)Math.pow(2, 8)-1;
+
+    //String checks
+    protected final String chkAllAscii = "[ -~]*";
 
     //member variables
     private static final byte version = 0x02;
@@ -71,10 +79,10 @@ public class N4MMessage {
 
         switch(qrCode) {
             case 0:
-                return N4MQuery.decode
-                        (msgId, errCode, getBytes(readPos, in.length-2, in));
+                return N4MQuery.decode(msgId, ErrorCodeType.valueOf(errCode),
+                        getBytes(readPos, in.length-2, in));
             case 1:
-                return N4MResponse.decode(errCode, msgId,
+                return N4MResponse.decode(ErrorCodeType.valueOf(errCode), msgId,
                         getBytes(readPos, in.length-2, in));
             default:
                 throw new N4MException(errMsgType,
@@ -91,7 +99,7 @@ public class N4MMessage {
         int pos = 0;
 
         ret[pos] = version << 4;
-        ret[pos] = (byte) (ret[pos] | getErrorCodeNum());
+        ret[pos] = (byte) (ret[pos] | getErrorCode().getErrorCodeNum());
 
         ret[++pos] = (byte) getMsgId();
         return ret;
@@ -101,8 +109,8 @@ public class N4MMessage {
      * Returns error code number
      * @return error code number
      */
-    public int getErrorCodeNum() {
-        return errorCode.getErrorCodeNum();
+    public ErrorCodeType getErrorCode() {
+        return errorCode;
     }
 
     /**
@@ -115,11 +123,14 @@ public class N4MMessage {
 
     /**
      * Set error code by number
-     * @param errorCodeNum new error code number
+     * @param ect new error code number
      * @throws N4MException if validation fails
      */
-    public void setErrorCodeNum(int errorCodeNum) throws N4MException {
-        errorCode = ErrorCodeType.valueOf(errorCodeNum);
+    public void setErrorCode(ErrorCodeType ect) throws N4MException {
+        if(ect == null) {
+            throw new NullPointerException(errNullError);
+        }
+        errorCode = ect;
     }
 
     /**
@@ -128,7 +139,7 @@ public class N4MMessage {
      * @throws N4MException if validation fails
      */
     public void setMsgId(int msgId) throws N4MException {
-        if(msgId < 0) {
+        if(msgId < 0 || msgId > MAXID) {
             throw new N4MException(errMessID, ErrorCodeType.BADMSG);
         }
         messageId = msgId;
@@ -159,7 +170,7 @@ public class N4MMessage {
         if(bArr == null) {
             throw new NullPointerException(paramByteArr + errNullParam);
         }
-        if(offSet < 0 || length > bArr.length) {
+        if(offSet < 0 || length < 0) {
             throw new IllegalArgumentException(errGetByteParams);
         }
         if(offSet >= bArr.length || length+offSet > bArr.length) {
@@ -171,7 +182,7 @@ public class N4MMessage {
 
         byte[] ret = new byte[length];
         int j = 0;
-        for(int i = offSet; j < length; i++, j++) {
+        for(int i = offSet; i < length+offSet; i++, j++) {
             ret[j] = bArr[i];
         }
         return ret;
@@ -198,7 +209,8 @@ public class N4MMessage {
 
         long integer = 0;
         for(int i = 0; i < bInt.length; i++) {
-            integer += unsignByte(bInt[i]) << 8*(bInt.length-i-1);
+            integer <<= 8;
+            integer |= unsignByte(bInt[i]);
         }
         return integer;
     }
@@ -208,13 +220,13 @@ public class N4MMessage {
      * @param val integer to convert
      * @return byte array representation of val
      */
-    protected  static byte[] i2b(int val) {
+    protected  static byte[] i2b(long val) {
         byte[] ret = new byte[4];
 
-        ret[3] = (byte) (val & 0xff);
-        ret[2] = (byte) ((val >> 8) & 0xff);
-        ret[1] = (byte) ((val >> 16) & 0xff);
-        ret[0] = (byte) ((val >> 24) & 0xff);
+        for(int i = 3; i >= 0; i--) {
+            ret[i] = (byte)(val & 0xff);
+            val >>= 8;
+        }
 
         return ret;
     }
@@ -230,11 +242,11 @@ public class N4MMessage {
         if(obj == null || getClass() != obj.getClass()) return false;
         N4MMessage that = (N4MMessage)obj;
         return getMsgId() == that.getMsgId() &&
-                getErrorCodeNum() == that.getErrorCodeNum();
+                getErrorCode() == that.getErrorCode();
     }
 
     @Override
     public String toString() {
-        return "ID=" + getMsgId() + "ErrorCode=" + getErrorCodeNum();
+        return "ID=" + getMsgId() + "ErrorCode=" + getErrorCode();
     }
 }

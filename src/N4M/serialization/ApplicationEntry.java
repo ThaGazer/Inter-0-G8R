@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Objects;
 
 import static N4M.serialization.N4MMessage.*;
@@ -26,9 +25,10 @@ public class ApplicationEntry {
     private static final String errCount = "invalid application count";
 
     //string parsing
-    private final String alphaNum = "[\\w]+";
+    private final String chkAllAscii = "[ -~]*";
 
     private final int MAXCOUNT = (int)(Math.pow(2, 16)-1);
+    private final int MAXNAME = (int)(Math.pow(2, 8)-1);
 
     //member variables
     private String applicationName;
@@ -119,7 +119,7 @@ public class ApplicationEntry {
      */
     public void setApplicationName(String appName)
             throws N4MException, NullPointerException {
-        if(!appName.matches(alphaNum)) {
+        if(!appName.matches(chkAllAscii) || appName.length() > MAXNAME) {
             throw new N4MException(errName, ErrorCodeType.BADMSG);
         }
         applicationName = Objects.requireNonNull(appName);

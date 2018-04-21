@@ -14,7 +14,7 @@ public class Cookie implements Comparable<Cookie> {
     private static final String errEmptyString = "empty string";
 
     private static final String delim = "=";
-    private static final String alphaNumMore = "[\\w-]+";
+    private static final String alphaNumMore = "[\\w]+";
 
     private String name;
     private String value;

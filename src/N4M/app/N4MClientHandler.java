@@ -12,6 +12,7 @@ import N4M.serialization.*;
 
 import java.net.DatagramPacket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -51,19 +52,20 @@ public class N4MClientHandler {
         N4MQuery message;
         try {
             try {
-                message = (N4MQuery)N4MMessage.decode(pack.getData());
+                message = (N4MQuery)N4MMessage.decode(getData(pack));
                 logger.info(buildLogMsg(message, true));
             } catch (N4MException n4me) {
                 logger.warning(msgN4M + n4me.getReason());
 
                 N4MResponse res = new N4MResponse();
-                res.setErrorCodeNum(n4me.getErrorCodeType().getErrorCodeNum());
+                res.setErrorCode(n4me.getErrorCodeType());
 
                 return sendResponse(res);
             }
 
             return sendResponse(new N4MResponse
-                    (0, message.getMsgId(), timestamp, appList));
+                    (ErrorCodeType.NOERROR, message.getMsgId(),
+                            timestamp, appList));
         } catch(N4MException n4me) {
             System.err.println(yaGotMe);
             return null;
@@ -78,6 +80,10 @@ public class N4MClientHandler {
     private byte[] sendResponse(N4MResponse res) {
         logger.info(buildLogMsg(res, false));
         return res.encode();
+    }
+
+    private byte[] getData(DatagramPacket pack) {
+        return Arrays.copyOf(pack.getData(), pack.getLength());
     }
 
     /**

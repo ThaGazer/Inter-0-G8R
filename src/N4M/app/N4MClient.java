@@ -10,6 +10,7 @@ package N4M.app;
 import N4M.serialization.*;
 import java.io.IOException;
 import java.net.*;
+import java.util.Date;
 
 public class N4MClient {
 
@@ -82,8 +83,8 @@ public class N4MClient {
             N4MResponse res = (N4MResponse) message;
 
             System.out.println(fieldId + res.getMsgId());
-            System.out.println(fieldTime + res.getTimeStamp());
-            System.out.println(fieldErrorCode + res.getErrorCodeNum());
+            System.out.println(fieldTime + new Date(res.getTimestamp()));
+            System.out.println(fieldErrorCode + res.getErrorCode());
             System.out.println(fieldApplications);
             for (ApplicationEntry ae : res.getApplications()) {
                 System.out.println(ae);
