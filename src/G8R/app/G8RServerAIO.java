@@ -1,4 +1,11 @@
 /*
+ * G8R.app:G8RSeverAIO
+ * Created on 4/21/2018
+ *
+ * Author(s):
+ * -Justin Ritter
+ */
+/*
  * G8R.app:G8RServer
  *
  * Date Created: Feb/20/2018
@@ -6,7 +13,6 @@
  *   -Justin Ritter
  */
 package G8R.app;
-
 
 import G8R.app.FunctionState.G8RFunctionFactory;
 import N4M.app.N4MClientHandler;
@@ -25,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
-public class G8RServer {
+public class G8RServerAIO {
 
     //private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGNAME = G8RServer.class.getName();
@@ -33,7 +39,7 @@ public class G8RServer {
     private static final String N4MLOGFILE = "./logs/n4m.log";
 
     private static final String errParams =
-            "Usage: <server port> <thread count>";
+            "Usage: <server port>";
     private static final String errServerCrash = "Server crashed";
     private static final String errThread = "could not close thread";
 
@@ -47,7 +53,6 @@ public class G8RServer {
     private static ArrayList<ApplicationEntry> appList = new ArrayList<>();
     private static ArrayList<Thread> threadList = new ArrayList<>();
     private static int servPort;
-    private static int numThread;
     private static long lastAccess;
 
     /**
@@ -56,12 +61,11 @@ public class G8RServer {
      * @throws IOException if I/O problem
      */
     public static void main(String[] argv) throws IOException, N4MException {
-        if(argv.length != 2) {
+        if(argv.length != 1) {
             throw new IllegalArgumentException(errParams);
         }
 
         servPort = Integer.parseInt(argv[0]);
-        numThread = Integer.parseInt(argv[1]);
 
         //initializes logger
         setup_logger();
@@ -136,28 +140,7 @@ public class G8RServer {
      * handles a G8R request
      */
     private static void handle_G8R() {
-        Thread t = new Thread(() -> {
-            ExecutorService pool = Executors.newFixedThreadPool(numThread);
 
-            try(ServerSocket servTCP = new ServerSocket(servPort)) {
-                setup_Server(servTCP);
-                logger.info(msgG8R + msgServerStart + servTCP.getLocalPort());
-
-                //G8RClients
-                while (true) {
-                    pool.execute(new G8RClientHandler(servTCP.accept(),
-                            appList));
-                    lastAccess = TimeUnit.MILLISECONDS.toSeconds
-                            (new Date().getTime());
-                }
-            } catch(Exception e) {
-                logger.log(Level.SEVERE, msgG8R + errServerCrash, e);
-            } finally {
-                logger.log(Level.INFO, msgG8R + msgG8RServerEnd);
-            }
-        });
-        threadList.add(t);
-        t.start();
     }
 
     /**
