@@ -83,6 +83,7 @@ public class G8RRequest extends G8RMessage {
      */
     public G8RRequest(String funct, String[] para, CookieList cook)
             throws ValidationException {
+        super();
         setFunction(funct);
         setParams(para);
         setCookieList(cook);

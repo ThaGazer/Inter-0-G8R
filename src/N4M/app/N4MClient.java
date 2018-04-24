@@ -14,14 +14,16 @@ import java.util.Date;
 
 public class N4MClient {
 
-    private static String errCommandParams = "Usage: <server ip/name> " +
+    private static final String errCommandParams = "Usage: <server ip/name> " +
             "<server port> <Business name>";
-    private static String errHost = "could not connect to: ";
+    private static final String errHost = "could not connect to: ";
+    private static final String errMsgId = "unexpected message Id...\n" +
+            "waiting for correct message Id";
 
-    private static String fieldTime = "Timestamp: ";
-    private static String fieldId = "Message Id: ";
-    private static String fieldErrorCode = "Error code: ";
-    private static String fieldApplications = "Applications: ";
+    private static final String fieldTime = "Timestamp: ";
+    private static final String fieldId = "Message Id: ";
+    private static final String fieldErrorCode = "Error code: ";
+    private static final String fieldApplications = "Applications: ";
 
     private static int messageId = (int) (Math.random() * 255);
 
@@ -59,11 +61,18 @@ public class N4MClient {
             soc.send(packet);
 
             //receive from server
-            packet = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
-            soc.receive(packet);
 
-            //decode message from server
-            N4MMessage message = N4MMessage.decode(packet.getData());
+            N4MMessage message;
+            do {
+                packet = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
+                soc.receive(packet);
+
+                //decode message from server
+                message = N4MMessage.decode(packet.getData());
+                if(message.getMsgId() != messageId) {
+                    System.err.println(errMsgId);
+                }
+            }while(message.getMsgId() != messageId);
 
             //print server response
             printResponse(message);
