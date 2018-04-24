@@ -17,8 +17,8 @@ public class N4MClient {
     private static final String errCommandParams = "Usage: <server ip/name> " +
             "<server port> <Business name>";
     private static final String errHost = "could not connect to: ";
-    private static final String errMsgId = "unexpected message Id...\n" +
-            "waiting for correct message Id";
+    private static final String errMsgId = "unexpected message Id\n" +
+            "waiting for correct message Id...";
 
     private static final String fieldTime = "Timestamp: ";
     private static final String fieldId = "Message Id: ";
