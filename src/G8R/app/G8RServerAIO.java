@@ -14,16 +14,21 @@
  */
 package G8R.app;
 
+import G8R.app.FunctionState.G8RFunction;
 import G8R.app.FunctionState.G8RFunctionFactory;
+import G8R.serialization.*;
 import N4M.app.N4MClientHandler;
 import N4M.serialization.ApplicationEntry;
 import N4M.serialization.N4MException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.SocketException;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -43,9 +48,8 @@ public class G8RServerAIO {
     private static final String errServerCrash = "Server crashed";
     private static final String errThread = "could not close thread";
 
-    private static final String msgServerStart = "Server started on port: ";
-    private static final String msgG8RServerEnd = "G8R Server closed";
-    private static final String msgN4MServerEnd = "N4M Server closed";
+    private static final String msgServerStart = "server started on port: ";
+    private static final String msgServerEnd = "server closed";
     private static final String msgG8R = "G8R ";
     private static final String msgN4M = "N4M ";
 
@@ -53,7 +57,7 @@ public class G8RServerAIO {
     private static ArrayList<ApplicationEntry> appList = new ArrayList<>();
     private static ArrayList<Thread> threadList = new ArrayList<>();
     private static int servPort;
-    private static long lastAccess;
+    private static long lastAccess = 0;
 
     /**
      * sends and receives messages from multiple clients
@@ -71,6 +75,7 @@ public class G8RServerAIO {
         setup_logger();
         setup_applicationList();
 
+        //client handlers
         handle_G8R();
         handle_N4M();
 
@@ -81,16 +86,6 @@ public class G8RServerAIO {
                 logger.severe(errThread);
             }
         }
-    }
-
-    /**
-     * sets up the configuration of tbe server
-     * @param server the server connection
-     * @throws SocketException if socket problem
-     */
-    private static void setup_Server(ServerSocket server)
-            throws SocketException {
-        server.setReuseAddress(true);
     }
 
     /**
@@ -140,13 +135,27 @@ public class G8RServerAIO {
      * handles a G8R request
      */
     private static void handle_G8R() {
+        logger.info(msgG8R + msgServerStart + servPort);
+        try (AsynchronousServerSocketChannel server =
+                     AsynchronousServerSocketChannel.open()) {
+            server.bind(new InetSocketAddress(servPort));
 
+            while(true) {
+                server.accept(new Attachments(server, appList), new G8RClientHandlerAIO());
+                lastAccess = TimeUnit.MILLISECONDS.toSeconds
+                        (new Date().getTime());
+            }
+        } catch (IOException e) {
+            System.err.println(msgG8R + errServerCrash);
+            logger.severe(msgG8R + errServerCrash);
+        }
     }
 
     /**
      * handles a N4M request
      */
     private static void handle_N4M() {
+        logger.info(msgN4M + msgServerStart + servPort);
         Thread t = new Thread(() -> {
             try(DatagramSocket servUDP = new DatagramSocket(servPort)) {
                 int maxPacketSize = servUDP.getReceiveBufferSize()-20;
@@ -169,10 +178,21 @@ public class G8RServerAIO {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, msgN4M + errServerCrash, e);
             } finally {
-                logger.info(msgN4M + msgN4MServerEnd);
+                logger.info(msgN4M + msgServerEnd);
             }
         });
         threadList.add(t);
         t.start();
+    }
+
+    static class Attachments {
+        AsynchronousServerSocketChannel server;
+        ArrayList<ApplicationEntry> appList;
+
+        Attachments(AsynchronousServerSocketChannel serv,
+                    ArrayList<ApplicationEntry> apps) {
+            server = serv;
+            appList.addAll(apps);
+        }
     }
 }

@@ -48,7 +48,7 @@ public class G8RServer {
     private static ArrayList<Thread> threadList = new ArrayList<>();
     private static int servPort;
     private static int numThread;
-    private static long lastAccess;
+    private static long lastAccess = 0;
 
     /**
      * sends and receives messages from multiple clients
