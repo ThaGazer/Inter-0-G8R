@@ -49,14 +49,15 @@ public class G8RClientHandlerAIO
     public void completed
             (AsynchronousSocketChannel channel, G8RServerAIO.Attachments att) {
         att.server.accept(null, this);
-        appEntries.addAll(att.appList);
+        appEntries.addAll(att.app);
         client = channel;
 
         ByteBuffer buffer = ByteBuffer.allocate(4096);
         client.read(buffer, CLIENTTIMEOUT, TimeUnit.MILLISECONDS, buffer, new readHandler());
 
         //input sink
-        MessageInput in = new MessageInput(new ByteArrayInputStream(buffer.array()));
+        ByteArrayInputStream bIn = new ByteArrayInputStream(buffer.array());
+        MessageInput in = new MessageInput(bIn);
 
         //output sink
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
@@ -85,9 +86,7 @@ public class G8RClientHandlerAIO
             client.close();
             logger.info(msgG8R + msgCloseConnect +
                     client.getRemoteAddress());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ValidationException e) {
+        } catch (IOException | ValidationException e) {
             e.printStackTrace();
         }
     }

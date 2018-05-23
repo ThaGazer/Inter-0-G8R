@@ -138,61 +138,18 @@ public class G8RServerAIO {
         logger.info(msgG8R + msgServerStart + servPort);
         try (AsynchronousServerSocketChannel server =
                      AsynchronousServerSocketChannel.open()) {
+
+            server.setOption(StandardSocketOptions.SO_REUSEADDR, true);
             server.bind(new InetSocketAddress(servPort));
 
-            while(true) {
-                server.accept(new Attachments(server, appList), new G8RClientHandlerAIO());
+            //while(true) {
+                server.accept(null, new G8RClientHandlerAIO());
                 lastAccess = TimeUnit.MILLISECONDS.toSeconds
                         (new Date().getTime());
-            }
+            //}
         } catch (IOException e) {
             System.err.println(msgG8R + errServerCrash);
             logger.severe(msgG8R + errServerCrash);
-        }
-    }
-
-    /**
-     * handles a N4M request
-     */
-    private static void handle_N4M() {
-        logger.info(msgN4M + msgServerStart + servPort);
-        Thread t = new Thread(() -> {
-            try(DatagramSocket servUDP = new DatagramSocket(servPort)) {
-                int maxPacketSize = servUDP.getReceiveBufferSize()-20;
-
-                while(true) {
-                    try {
-                        DatagramPacket p = new DatagramPacket
-                                (new byte[maxPacketSize], maxPacketSize);
-
-                        servUDP.receive(p);
-                        N4MClientHandler handler =
-                                new N4MClientHandler(p, appList, lastAccess);
-
-                        p.setData(handler.response());
-                        servUDP.send(p);
-                    } catch(IOException ioe) {
-                        logger.warning(msgN4M + ioe.getMessage());
-                    }
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, msgN4M + errServerCrash, e);
-            } finally {
-                logger.info(msgN4M + msgServerEnd);
-            }
-        });
-        threadList.add(t);
-        t.start();
-    }
-
-    static class Attachments {
-        AsynchronousServerSocketChannel server;
-        ArrayList<ApplicationEntry> appList;
-
-        Attachments(AsynchronousServerSocketChannel serv,
-                    ArrayList<ApplicationEntry> apps) {
-            server = serv;
-            appList.addAll(apps);
         }
     }
 }
