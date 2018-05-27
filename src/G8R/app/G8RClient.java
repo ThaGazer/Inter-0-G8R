@@ -51,7 +51,7 @@ public class G8RClient {
                 ve.printStackTrace(errReadingCookie);
             }
 
-            //sending and receiving from server
+            //sending and receiving initial message from server
             try {
                 initFunct(out, scn);
             } catch (ValidationException | IOException e) {

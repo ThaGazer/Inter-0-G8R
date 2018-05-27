@@ -144,7 +144,7 @@ public class N4MResponse extends N4MMessage {
     }
 
     /**
-     * Returns timestamp in milliseconds
+     * Returns timestamp in seconds
      * @return timestamp
      */
     public long getTimestamp() {

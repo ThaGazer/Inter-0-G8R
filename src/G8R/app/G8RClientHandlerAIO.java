@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class G8RClientHandlerAIO
-        implements CompletionHandler<AsynchronousSocketChannel, G8RServerAIO.Attachments> {
+        implements CompletionHandler<AsynchronousSocketChannel, Void> {
 
     private static final String errFunction = "Unexpected function";
     private static final String errClose = "could not close connection";
@@ -47,9 +47,7 @@ public class G8RClientHandlerAIO
 
     @Override
     public void completed
-            (AsynchronousSocketChannel channel, G8RServerAIO.Attachments att) {
-        att.server.accept(null, this);
-        appEntries.addAll(att.app);
+            (AsynchronousSocketChannel channel, Void c) {
         client = channel;
 
         ByteBuffer buffer = ByteBuffer.allocate(4096);
@@ -92,7 +90,7 @@ public class G8RClientHandlerAIO
     }
 
     @Override
-    public void failed(Throwable exc, G8RServerAIO.Attachments att) {
+    public void failed(Throwable exc, Void c) {
         logger.log(Level.WARNING, errFailed, exc);
     }
 

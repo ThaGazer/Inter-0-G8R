@@ -147,6 +147,7 @@ public class G8RServer {
                 while (true) {
                     pool.execute(new G8RClientHandler(servTCP.accept(),
                             appList));
+                    //timestamp in seconds
                     lastAccess = TimeUnit.MILLISECONDS.toSeconds
                             (new Date().getTime());
                 }

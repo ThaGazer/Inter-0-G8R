@@ -11,14 +11,14 @@ import N4M.serialization.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class N4MClient {
 
     private static final String errCommandParams = "Usage: <server ip/name> " +
             "<server port> <Business name>";
     private static final String errHost = "could not connect to: ";
-    private static final String errMsgId = "unexpected message Id\n" +
-            "waiting for correct message Id...";
+    private static final String errMsgId = "unexpected message Id";
 
     private static final String fieldTime = "Timestamp: ";
     private static final String fieldId = "Message Id: ";
@@ -61,18 +61,13 @@ public class N4MClient {
             soc.send(packet);
 
             //receive from server
-
             N4MMessage message;
-            do {
-                packet = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
-                soc.receive(packet);
+            packet = new DatagramPacket(new byte[maxPacketSize],
+                    maxPacketSize);
+            soc.receive(packet);
 
-                //decode message from server
-                message = N4MMessage.decode(packet.getData());
-                if(message.getMsgId() != messageId) {
-                    System.err.println(errMsgId);
-                }
-            }while(message.getMsgId() != messageId);
+            //decode message from server
+            message = N4MMessage.decode(packet.getData());
 
             //print server response
             printResponse(message);
@@ -90,14 +85,23 @@ public class N4MClient {
     private static void printResponse(N4MMessage message) {
         if (messageId == message.getMsgId()) {
             N4MResponse res = (N4MResponse) message;
+            long timestamp = TimeUnit.SECONDS.toMillis(res.getTimestamp());
 
             System.out.println(fieldId + res.getMsgId());
-            System.out.println(fieldTime + new Date(res.getTimestamp()));
+
+            if(timestamp == 0) {
+                System.out.println(fieldTime + timestamp);
+            } else {
+                System.out.println(fieldTime + new Date(timestamp));
+            }
             System.out.println(fieldErrorCode + res.getErrorCode());
             System.out.println(fieldApplications);
             for (ApplicationEntry ae : res.getApplications()) {
                 System.out.println(ae);
             }
+        }
+        else {
+            System.out.println(errMsgId);
         }
     }
 }

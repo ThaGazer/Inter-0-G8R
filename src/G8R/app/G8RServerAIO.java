@@ -77,7 +77,7 @@ public class G8RServerAIO {
 
         //client handlers
         handle_G8R();
-        handle_N4M();
+        //handle_N4M();
 
         for(Thread t : threadList) {
             try {

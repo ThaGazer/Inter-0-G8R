@@ -37,6 +37,8 @@ public class G8RClientHandler implements Runnable {
     private ArrayList<ApplicationEntry> appList;
     private Socket client;
     private Logger logger = Logger.getLogger(LOGGERNAME);
+    private MessageInput in;
+    private MessageOutput out;
 
     /**
      * creates a new clientHandler runnable
@@ -55,8 +57,8 @@ public class G8RClientHandler implements Runnable {
             logger.info(msgG8R + msgConnection +
                     client.getLocalSocketAddress());
 
-            MessageInput in = new MessageInput(client.getInputStream());
-            MessageOutput out = new MessageOutput(client.getOutputStream());
+            in = new MessageInput(client.getInputStream());
+            out = new MessageOutput(client.getOutputStream());
 
             G8RMessage mess = G8RMessage.decode(in);
             Enum e = G8RFunctionFactory.getByName(mess.getFunction());
@@ -80,9 +82,16 @@ public class G8RClientHandler implements Runnable {
             logger.info(msgG8R + msgCloseConnect +
                     client.getLocalSocketAddress());
         } catch(ValidationException ve) {
-            logger.severe(msgG8R + ve.getReason() + msgClientClose);
+            try {
+                if(!out.isNull()) {
+                    new G8RResponse(G8RResponse.type_ERROR, "NULL",
+                            ve.getReason(), new CookieList()).encode(out);
+                }
+            } catch (ValidationException | IOException ignored) {
+            }
+            logger.warning(msgG8R + ve.getReason() + msgClientClose);
         } catch(IOException e) {
-            logger.warning(msgG8R + e.getMessage() + msgClientClose);
+            logger.severe(msgG8R + e.getMessage() + msgClientClose);
         } finally {
             try {
                 client.close();
