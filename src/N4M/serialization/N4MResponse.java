@@ -23,6 +23,7 @@ public class N4MResponse extends N4MMessage {
     private static final String errTime = "invalid timestamp";
     private static final String errLongTime = "timestamp is too large";
     private static final String errList = "application list is too large";
+    private static final String errBuffSize = "invalid buffer size";
 
     //member variables
     private Date responseTime = new Date();
@@ -92,6 +93,11 @@ public class N4MResponse extends N4MMessage {
             readPos += nameLen;
 
             entries.add(new ApplicationEntry(name, count));
+        }
+
+        //bounds checking
+        if(in.length != readPos) {
+            throw new N4MException(errBuffSize, ErrorCodeType.BADMSGSIZE);
         }
 
         return new N4MResponse(errCode, msgId, time, entries);
