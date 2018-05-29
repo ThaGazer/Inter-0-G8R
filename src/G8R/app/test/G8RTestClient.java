@@ -34,6 +34,7 @@ public class G8RTestClient {
         }
 
         for(int i = 0; i < read; i++) {
+            System.out.println("connection: " + i);
             connectToServer(addr, port);
         }
     }
@@ -44,16 +45,15 @@ public class G8RTestClient {
                 MessageOutput out = new MessageOutput(soc.getOutputStream());
                 MessageInput in = new MessageInput(soc.getInputStream());
 
-                initFunct(out, function);
+                //initFunct(out, function);
 
-                Scanner scn = new Scanner(System.in);
-                String line;
-                while(!(line = scn.nextLine()).equals("q")) {
-                    G8RMessage message = G8RMessage.decode(new MessageInput(soc.getInputStream()));
-                    printResponse(message);
-
+                String line = "G8R/1.0 Q RUN " + function + "\r\n\r\n";
                     out.write(line);
-                }
+                    G8RMessage message = G8RMessage.decode(in);
+                    printResponse(message);
+                    new G8RRequest(message.getFunction(), new String[]{"mex", "mex"}, message.getCookieList()).encode(out);
+                    message = G8RMessage.decode(in);
+                    printResponse(message);
             }
 
         } catch (Exception e) {
@@ -73,9 +73,8 @@ public class G8RTestClient {
 
     private static void printResponse(G8RMessage message) {
         G8RResponse res = (G8RResponse)message;
-
-        if(((G8RResponse) message).getStatus().equals("ERROR")) {
-                System.err.println(res.getMessage());
+        if(res.getStatus().equals(G8RResponse.type_ERROR)) {
+            System.err.println(res);
         }
     }
 }

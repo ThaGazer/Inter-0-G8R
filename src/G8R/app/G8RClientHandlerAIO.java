@@ -22,6 +22,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,10 @@ public class G8RClientHandlerAIO
     private static final String errFunction = "Unexpected function";
     private static final String errClose = "could not close connection";
     private static final String errRead = "failed to read from client";
+    private static final String errWrite = "failed to write to client";
     private static final String errConnection = "failed to accept a connection";
+    private static final String errMaxCount =
+            "reached the max count for an application";
 
     private static final String msgG8R = "G8R ";
     private static final String msgConnection = "connected to: ";
@@ -42,60 +46,43 @@ public class G8RClientHandlerAIO
     private static final String LOGGERNAME = G8RServer.class.getName();
 
     private static final int CLIENTTIMEOUT = 20000;
+    private static final int BUFFERMAXSIZE = 4096;
 
     private Logger logger = Logger.getLogger(LOGGERNAME);
+    private List<ApplicationEntry> appEntries = new ArrayList<>();
     private AsynchronousSocketChannel client;
-    private ArrayList<ApplicationEntry> appEntries;
     private G8RMessage message;
 
     @Override
     public void completed
             (AsynchronousSocketChannel channel, Attachment attach) {
         if(attach.server.isOpen()) {
-            attach.server.accept(null, this);
-        }
-        client = channel;
 
-        attach.lassAccess = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
-
-        //input sink
-        ByteBuffer[] buffArr = new ByteBuffer[]{ByteBuffer.allocate(4096)};
-        client.read(buffArr, 0, 1, CLIENTTIMEOUT, TimeUnit.MILLISECONDS, buffArr, new readHandler());
-
-/*        //input sink
-        ByteArrayInputStream bIn = new ByteArrayInputStream(buffer.array());
-        MessageInput in = new MessageInput(bIn);
-
-        //output sink
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        MessageOutput out = new MessageOutput(bOut);
-
-        try {
-            G8RMessage mess = G8RMessage.decode(in);
-            Enum e = G8RFunctionFactory.getByName(mess.getFunction());
-
-            if (e != null) {
-                incrementApp(e);
-                while ((e = handleRequest(mess, e, out)) !=
-                        ((G8RFunction) e).last()) {
-                    logger.log(Level.INFO, buildConnection(mess, false), mess);
-
-                    client.read(buffer, CLIENTTIMEOUT, TimeUnit.MILLISECONDS, buffer, new readHandler());
-                    mess = G8RMessage.decode(in);
-                }
-            } else {
-                mess = new G8RResponse(G8RResponse.type_ERROR, "NULL",
-                        errFunction, mess.getCookieList());
-                mess.encode(out);
-                logger.log(Level.WARNING, buildConnection(mess, true), mess);
+            client = channel;
+            try {
+                logger.info(msgG8R + msgConnection + client.getRemoteAddress());
+            } catch (IOException e) {
+                logger.severe(msgG8R + errConnection);
             }
 
-            client.close();
-            logger.info(msgG8R + msgCloseConnect +
-                    client.getRemoteAddress());
-        } catch (IOException | ValidationException e) {
-            e.printStackTrace();
-        }*/
+            appEntries.clear();
+            appEntries.addAll(attach.appEntries);
+
+            //update lass access
+            attach.lassAccess = TimeUnit.MILLISECONDS.toSeconds(
+                    new Date().getTime());
+
+            //accept next connection
+            attach.server.accept(attach, this);
+
+            /*make this a ByteBuffer[] to allow for
+              larger inputs and a more structured read formats
+            */
+            //input sink
+            ByteBuffer buffArr = ByteBuffer.allocate(BUFFERMAXSIZE);
+
+            readFrom(buffArr, new readHandler());
+        }
     }
 
     @Override
@@ -112,29 +99,10 @@ public class G8RClientHandlerAIO
             if(ae.getApplicationName().equals(((G8RFunction)funct).getName())) {
                 try {
                     ae.setAccessCount(ae.getAccessCount() + 1);
-                } catch (N4MException ignored) {}
+                } catch (N4MException ignored) {
+                    logger.warning(errMaxCount);
+                }
             }
-        }
-    }
-
-    /**
-     * handler of the state received from client
-     * @param clientMess the message from the client
-     * @param function function state from the client
-     */
-    private Enum<?> handleRequest
-    (G8RMessage clientMess, Enum function, MessageOutput out)
-            throws ValidationException, IOException {
-        logger.log(Level.INFO, buildConnection(clientMess, true), clientMess);
-        G8RRequest clientRequest = (G8RRequest) clientMess;
-
-        if(!clientRequest.getFunction().equals(
-                ((G8RFunction) function).getName())) {
-            new G8RResponse(G8RResponse.type_ERROR, "NULL", errFunction,
-                    clientMess.getCookieList()).encode(out);
-            return ((G8RFunction) function).last();
-        } else {
-            return ((G8RFunction) function).next(clientRequest, out);
         }
     }
 
@@ -155,38 +123,132 @@ public class G8RClientHandlerAIO
         }
     }
 
+    /**
+     * reads input from a client
+     * @param buff buffer to read into
+     */
+    private void readFrom(ByteBuffer buff, readHandler reader) {
+        client.read(buff, CLIENTTIMEOUT, TimeUnit.MILLISECONDS,
+                buff, reader);
+    }
+
+    private void writeTo(byte[] buffer, writeHandler writer) {
+        ByteBuffer buff = ByteBuffer.wrap(buffer);
+        client.write(buff, buff, writer);
+    }
+
     private class readHandler implements
-            CompletionHandler<Long, ByteBuffer[]> {
+            CompletionHandler<Integer, ByteBuffer> {
 
         @Override
-        public void completed(Long result, ByteBuffer[] buff) {
+        public void completed(Integer result, ByteBuffer buff) {
             if(client.isOpen()) {
                 if (result == -1) {
                     try {
                         client.close();
-                        logger.warning(msgG8R + errRead);
+                        logger.warning(msgG8R + errRead + msgClientClose);
                     } catch (IOException e) {
-                        logger.warning(msgG8R + errClose);
+                        logger.log(Level.WARNING, e.getMessage(), e);
                     }
-                    System.exit(-1);
-                }
-
-                try {
-                    message = G8RMessage.decode(new MessageInput(new ByteArrayInputStream(buff[0].array())));
+                } else {
                     try {
-                        logger.log(Level.INFO, buildConnection(message, true));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        message = G8RMessage.decode(new MessageInput(
+                                new ByteArrayInputStream(buff.array())));
+                        try {
+                            logger.log(Level.INFO,
+                                    buildConnection(message, true));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        ByteArrayOutputStream bOut =
+                                new ByteArrayOutputStream();
+                        MessageOutput out = new MessageOutput(bOut);
+
+                        Enum e = G8RFunctionFactory.getByName
+                                (message.getFunction());
+
+                        if(e != null) {
+                            incrementApp(e);
+                            e = ((G8RFunction)e).next(message, out);
+
+                            if(e == ((G8RFunction) e).last()) {
+                                buff = ByteBuffer.wrap(bOut.toByteArray());
+                                writeTo(buff.array(), new writeHandler());
+
+                                logger.info(msgG8R + msgCloseConnect +
+                                        client.getRemoteAddress());
+                                client.close();
+                            } else {
+                                buff = ByteBuffer.wrap(bOut.toByteArray());
+                                writeTo(buff.array(), new writeHandler());
+
+                                buff = ByteBuffer.allocate(BUFFERMAXSIZE);
+                                readFrom(buff, new readHandler());
+                            }
+                        } else {
+                            new G8RResponse(G8RResponse.type_ERROR, "NULL",
+                                    errFunction, message.getCookieList()).encode
+                                    (out);
+                            logger.log(Level.WARNING,
+                                    buildConnection(message, true), message);
+                            writeTo(bOut.toByteArray(), new writeHandler());
+                        }
+                    } catch (IOException | ValidationException e) {
+                        readFrom(buff, this);
                     }
-                } catch (IOException | ValidationException e) {
-                    client.read(buff, 0, 1, CLIENTTIMEOUT, TimeUnit.MILLISECONDS, buff, this);
                 }
             }
         }
 
         @Override
-        public void failed(Throwable exc, ByteBuffer[] attachment) {
+        public void failed(Throwable exc, ByteBuffer attachment) {
             logger.log(Level.WARNING, errRead, exc);
+            try {
+                client.close();
+            } catch (IOException e) {
+                logger.warning(msgG8R + errClose);
+            }
+        }
+    }
+
+    private class writeHandler implements
+            CompletionHandler<Integer, ByteBuffer> {
+
+        @Override
+        public void completed(Integer result, ByteBuffer attachment) {
+            if(client.isOpen()) {
+                if (result == -1) {
+                    try {
+                        client.close();
+                        logger.warning(msgG8R + errWrite + msgClientClose);
+                    } catch(IOException e) {
+                        logger.log(Level.WARNING, e.getMessage(), e);
+                    }
+                } else if(attachment.hasRemaining()) {
+                    client.write(attachment, attachment, this);
+                } else {
+                    try {
+                        message = G8RMessage.decode(new MessageInput(new ByteArrayInputStream(attachment.array())));
+                        logger.info(msgG8R + buildConnection(message, false));
+                    } catch (ValidationException | IOException e) {
+                        e.printStackTrace();
+                    }
+                    attachment.clear();
+                }
+            }
+        }
+
+        @Override
+        public void failed(Throwable exc, ByteBuffer attachment) {
+            logger.log(Level.WARNING, errWrite, exc);
+            if(client.isOpen()) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    logger.warning(msgG8R + errClose);
+                }
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ public class G8RClient {
 
     private static final String errNumParams =
             "Usage: <server identity> <server port> <cookie file>";
-    private static final String errReadingCookie = "Failed read cookies";
+    private static final String errReadingCookie = "Failed to read cookies";
 
     private static final String msgConsoleEnding = "> ";
 
@@ -29,27 +29,33 @@ public class G8RClient {
     private static CookieList clientCookie = new CookieList();
     private static G8RMessage message;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if(args.length != 3) {
             throw new IllegalArgumentException(errNumParams);
         }
 
-        InetAddress sIdent = InetAddress.getByName(args[0]);
+        InetAddress sIdent = null;
+        try {
+            sIdent = InetAddress.getByName(args[0]);
+        } catch (UnknownHostException e) {
+            System.err.println(e.getMessage());
+            System.exit(-1);
+        }
         int sPort = Integer.parseInt(args[1]);
         String cFileName = args[2];
         Scanner scn = new Scanner(System.in);
 
+        //initialize cookies
+        try {
+            readInCookie(cFileName);
+        } catch(IOException | ValidationException ve) {
+            ve.printStackTrace();
+            System.exit(-1);
+        }
 
         try (Socket soc = new Socket(sIdent, sPort)) {
             MessageInput in = new MessageInput(soc.getInputStream());
             MessageOutput out = new MessageOutput(soc.getOutputStream());
-
-            //initialize cookies
-            try {
-                readInCookie(cFileName);
-            } catch(ValidationException ve) {
-                ve.printStackTrace(errReadingCookie);
-            }
 
             //sending and receiving initial message from server
             try {
@@ -84,6 +90,8 @@ public class G8RClient {
                         new BufferedInputStream(
                                 new FileInputStream(fileName))));
             }
+        } else {
+            throw new IOException(errReadingCookie);
         }
     }
 

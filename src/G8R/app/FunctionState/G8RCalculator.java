@@ -19,11 +19,21 @@ public enum G8RCalculator implements G8RFunction {
                 throws IOException, ValidationException {
             return state_Math(req, out);
         }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return FUNCT;
+        }
     },FUNCT("Operator") {
         @Override
         public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Funct(req, out);
+        }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return ADD;
         }
     }, ADD("add") {
         @Override
@@ -31,11 +41,21 @@ public enum G8RCalculator implements G8RFunction {
                 throws IOException, ValidationException {
             return state_Add(req, out);
         }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return SUBTRACT;
+        }
     }, SUBTRACT("subtract") {
         @Override
         public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws IOException, ValidationException {
             return state_Subtract(req, out);
+        }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return MULTIPLY;
         }
     }, MULTIPLY("multiply") {
         @Override
@@ -43,16 +63,31 @@ public enum G8RCalculator implements G8RFunction {
                 throws IOException, ValidationException {
             return state_Multiply(req, out);
         }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return EXIT;
+        }
     }, EXIT("fin") {
         @Override
         public G8RCalculator next(G8RMessage req, MessageOutput out)
                 throws ValidationException, IOException {
             return state_Exit(req, out);
         }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return NULL;
+        }
     }, NULL("NULL") {
         @Override
         public G8RCalculator next(G8RMessage request, MessageOutput out) {
             return NULL;
+        }
+
+        @Override
+        public G8RCalculator nextFunct() {
+            return null;
         }
     };
 
@@ -235,6 +270,14 @@ public enum G8RCalculator implements G8RFunction {
         return FUNCT;
     }
 
+    /**
+     *
+     * @param mess
+     * @param out
+     * @return
+     * @throws ValidationException
+     * @throws IOException
+     */
     protected G8RCalculator state_Exit(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         mess = buildOkResponse(NULL.getName(), buildFinalSum(mess.getCookieList()),
@@ -243,10 +286,20 @@ public enum G8RCalculator implements G8RFunction {
         return NULL;
     }
 
+    /**
+     * builds a sum message
+     * @param cookies the cookies contains the sum
+     * @return the built message
+     */
     private String buildSum(CookieList cookies) {
         return msgSum + cookies.getValue(cookie_Sum) + msgFunction;
     }
 
+    /**
+     * builds the final summation message
+     * @param cookies the cookies containing the sum
+     * @return the built message
+     */
     private String buildFinalSum(CookieList cookies) {
         return msgFinalSum + cookies.getValue(cookie_Sum);
     }

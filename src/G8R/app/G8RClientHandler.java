@@ -61,7 +61,7 @@ public class G8RClientHandler implements Runnable {
             out = new MessageOutput(client.getOutputStream());
 
             G8RMessage mess = G8RMessage.decode(in);
-            Enum e = G8RFunctionFactory.getByName(mess.getFunction());
+            Enum e = G8RFunctionFactory.getByFirst(mess.getFunction());
 
             if(e != null) {
                 incrementApp(e);
@@ -78,9 +78,9 @@ public class G8RClientHandler implements Runnable {
                 logger.log(Level.WARNING, buildConnection(mess, true), mess);
             }
 
-            client.close();
             logger.info(msgG8R + msgCloseConnect +
                     client.getLocalSocketAddress());
+            client.close();
         } catch(ValidationException ve) {
             try {
                 if(!out.isNull()) {

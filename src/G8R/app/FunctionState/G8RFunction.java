@@ -24,4 +24,6 @@ public interface G8RFunction {
 
     Enum<?> next(G8RMessage request, MessageOutput out)
             throws ValidationException, IOException;
+
+    Enum<? extends G8RFunction> nextFunct();
 }

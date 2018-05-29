@@ -10,6 +10,7 @@ package N4M.app;
 import N4M.serialization.*;
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -67,7 +68,7 @@ public class N4MClient {
             soc.receive(packet);
 
             //decode message from server
-            message = N4MMessage.decode(packet.getData());
+            message = N4MMessage.decode(Arrays.copyOf(packet.getData(), packet.getLength()));
 
             //print server response
             printResponse(message);

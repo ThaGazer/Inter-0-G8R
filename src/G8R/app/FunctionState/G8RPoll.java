@@ -18,11 +18,21 @@ public enum G8RPoll implements G8RFunction {
                 throws ValidationException, IOException {
             return state_Poll(request, out);
         }
+
+        @Override
+        public G8RPoll nextFunct() {
+            return NAMESTEP;
+        }
     }, NAMESTEP("NameStep") {
         @Override
         public G8RPoll next(G8RMessage request, MessageOutput out)
                 throws ValidationException, IOException {
             return state_NameStep(request, out);
+        }
+
+        @Override
+        public G8RPoll nextFunct() {
+            return FOODMOOD;
         }
     }, FOODMOOD("FoodMood") {
         @Override
@@ -30,10 +40,20 @@ public enum G8RPoll implements G8RFunction {
                 throws ValidationException, IOException {
             return state_FoodMood(request, out);
         }
+
+        @Override
+        public G8RPoll nextFunct() {
+            return NULL;
+        }
     }, NULL("NULL") {
         @Override
         public G8RPoll next(G8RMessage request, MessageOutput out) {
             return NULL;
+        }
+
+        @Override
+        public G8RPoll nextFunct() {
+            return null;
         }
     };
 

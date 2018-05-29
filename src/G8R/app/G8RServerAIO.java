@@ -14,26 +14,16 @@
  */
 package G8R.app;
 
-import G8R.app.FunctionState.G8RFunction;
 import G8R.app.FunctionState.G8RFunctionFactory;
-import G8R.serialization.*;
 import N4M.app.N4MClientHandler;
 import N4M.serialization.ApplicationEntry;
-import N4M.serialization.N4MException;
-import org.junit.jupiter.params.ParameterizedTest;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
@@ -52,11 +42,10 @@ public class G8RServerAIO {
     private static final String errThread = "could not close thread";
     private static final String errServerSetup = "error setting up server";
     private static final String errLogger = "could not create logger";
-    private static final String errAppList = "could not create " +
-            "the application list";
+    private static final String errGroup = "could not create async group";
 
     private static final String msgServerStart = "server started on port: ";
-    private static final String msgServerEnd = "server closed";
+    private static final String msgServerEnd = " server closed";
     private static final String msgG8R = "G8R ";
     private static final String msgN4M = "N4M ";
 
@@ -64,7 +53,8 @@ public class G8RServerAIO {
     private static ArrayList<ApplicationEntry> appList = new ArrayList<>();
     private static ArrayList<Thread> threadList = new ArrayList<>();
     private static int servPort;
-    private static long lastAccess = 0;
+    private static AsynchronousChannelGroup group;
+    private static Attachment a;
 
     /**
      * sends and receives messages from multiple clients
@@ -85,16 +75,11 @@ public class G8RServerAIO {
             System.exit(-1);
         }
 
-        try {
-            setup_applicationList();
-        } catch(N4MException e) {
-            logger.severe(errAppList);
-            System.exit(-1);
-        }
+        setup_applicationList();
 
         //client handlers
+        handle_N4M();
         handle_G8R();
-        //handle_N4M();
 
         for(Thread t : threadList) {
             try {
@@ -147,9 +132,8 @@ public class G8RServerAIO {
 
     /**
      * creates an application list of all applications
-     * @throws N4MException is could not get application
      */
-    private static void setup_applicationList() throws N4MException {
+    private static void setup_applicationList() {
         appList.addAll(G8RFunctionFactory.values());
     }
 
@@ -167,30 +151,80 @@ public class G8RServerAIO {
      */
     private static void handle_G8R() {
         logger.info(msgG8R + msgServerStart + servPort);
-        try (AsynchronousServerSocketChannel server =
-                     AsynchronousServerSocketChannel.open()) {
 
-            //server setup
-            setup_sever(server);
+        try {
+            try {
+                group = AsynchronousChannelGroup.withThreadPool
+                        (Executors.newSingleThreadExecutor());
+                try (AsynchronousServerSocketChannel server =
+                             AsynchronousServerSocketChannel.open(group)) {
 
-            while(true) {
-                Attachment a = new Attachment(0L, server);
-                server.accept(a, new G8RClientHandlerAIO());
-                System.in.read();
+                    //server setup
+                    setup_sever(server);
+
+                    a = new Attachment(0L, server, appList);
+                    server.accept(a, new G8RClientHandlerAIO());
+
+                    group.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+                } catch (IOException e) {
+                    System.err.println(msgG8R + errServerCrash);
+                    logger.severe(msgG8R + errServerCrash);
+                } catch (InterruptedException ignored) {
+                }
+            } catch (IOException e) {
+                logger.severe(errGroup);
+                group.shutdown();
             }
-        } catch (IOException e) {
-            System.err.println(msgG8R + errServerCrash);
-            logger.severe(msgG8R + errServerCrash);
+        } catch(Exception e) {
+            logger.log(Level.SEVERE, msgG8R + errServerCrash, e);
         }
+    }
+
+    /**
+     * handles a N4M request
+     */
+    private static void handle_N4M() {
+        Thread t = new Thread(() -> {
+            try(DatagramSocket servUDP = new DatagramSocket(servPort)) {
+                logger.info(msgN4M + msgServerStart + servUDP.getLocalPort());
+                int maxPacketSize = servUDP.getReceiveBufferSize()-20;
+
+                while(true) {
+                    try {
+                        DatagramPacket p = new DatagramPacket
+                                (new byte[maxPacketSize], maxPacketSize);
+
+                        servUDP.receive(p);
+                        N4MClientHandler handler =
+                                new N4MClientHandler(p, appList, a.lassAccess);
+
+                        p.setData(handler.response());
+                        servUDP.send(p);
+                    } catch(IOException ioe) {
+                        logger.warning(msgN4M + ioe.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, msgN4M + errServerCrash, e);
+            } finally {
+                logger.info(msgN4M + msgServerEnd);
+            }
+        });
+        threadList.add(t);
+        t.start();
+
     }
 
     public static class Attachment {
         long lassAccess;
         AsynchronousServerSocketChannel server;
+        ArrayList<ApplicationEntry> appEntries;
 
-        public Attachment(long aTime, AsynchronousServerSocketChannel aServ) {
+        public Attachment(long aTime, AsynchronousServerSocketChannel aServ,
+                          ArrayList<ApplicationEntry> apps) {
             lassAccess = aTime;
             server = aServ;
+            appEntries = apps;
         }
     }
 }
