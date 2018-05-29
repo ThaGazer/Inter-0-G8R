@@ -79,7 +79,7 @@ public class G8RClientHandler implements Runnable {
             }
 
             logger.info(msgG8R + msgCloseConnect +
-                    client.getLocalSocketAddress());
+                    client.getRemoteSocketAddress());
             client.close();
         } catch(ValidationException ve) {
             try {

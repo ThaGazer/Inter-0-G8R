@@ -49,6 +49,7 @@ public class N4MClient {
 
         N4MQuery clientAsks;
         try(DatagramSocket soc = new DatagramSocket()) {
+            soc.setSoTimeout(20000);
             DatagramPacket packet;
             int maxPacketSize = soc.getReceiveBufferSize()-20;
 
@@ -75,7 +76,7 @@ public class N4MClient {
         } catch(N4MException n4me) {
             n4me.printReason();
         } catch(IOException ioe) {
-            ioe.printStackTrace();
+            System.err.println(ioe.getMessage());
         }
     }
 
