@@ -14,6 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class G8RFunctionFactory {
+
+    /**
+     * determines if a name is a valid G8R function
+     * @param name name of potential function
+     * @return the actual enum or null if no enum with that name exist
+     */
     public static Enum<? extends G8RFunction> getByName(String name) {
         for(Enum<? extends G8RFunction> e : getFirst()) {
             for(Enum<? extends G8RFunction> funct = e; funct != null;
@@ -26,6 +32,11 @@ public class G8RFunctionFactory {
         return null;
     }
 
+    /**
+     * determines if a name is a valid first G8R function
+     * @param name name of potential function
+     * @return the actual first enum with that name
+     */
     public static Enum<? extends G8RFunction> getByFirst(String name) {
         for(Enum<? extends G8RFunction> e : getFirst()) {
             if(((G8RFunction)e).getName().equals(name)) {
@@ -35,6 +46,10 @@ public class G8RFunctionFactory {
         return null;
     }
 
+    /**
+     * forms a list of all possible first G8R functions
+     * @return list of first functions
+     */
     public static List<Enum<? extends G8RFunction>> getFirst() {
         List<Enum<? extends G8RFunction>> list = new ArrayList<>();
         list.add(G8RPoll.first());
@@ -42,6 +57,10 @@ public class G8RFunctionFactory {
         return list;
     }
 
+    /**
+     * forms a list of all possible first G8R function names
+     * @return list of G8R function names
+     */
     public static List<ApplicationEntry> values() {
         ArrayList<ApplicationEntry> list = new ArrayList<>();
         try {

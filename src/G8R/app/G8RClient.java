@@ -81,6 +81,12 @@ public class G8RClient {
         }
     }
 
+    /**
+     * reads in the cookie list file
+     * @param fileName name of cookie file
+     * @throws IOException if I/O problem
+     * @throws ValidationException if G8R problem
+     */
     private static void readInCookie(String fileName)
             throws IOException, ValidationException {
         File file = new File(fileName);
@@ -95,12 +101,24 @@ public class G8RClient {
         }
     }
 
+    /**
+     * saves cookielist to file
+     * @param fileName name of cookie file
+     * @throws IOException if I/O problem
+     */
     private static void writeOutCookie(String fileName)
             throws IOException {
         clientCookie.encode(
                 new MessageOutput(new FileOutputStream(fileName)));
     }
 
+    /**
+     * constructs a new intial message
+     * @param out output sink
+     * @param scn input sink
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     private static void initFunct(MessageOutput out, Scanner scn)
             throws ValidationException, IOException {
         System.out.print("Function" + msgConsoleEnding);
@@ -111,6 +129,15 @@ public class G8RClient {
         message.encode(out);
     }
 
+    /**
+     * handles client operations
+     * @param in input sink
+     * @param out output sink
+     * @param scn input sink
+     * @return
+     * @throws ValidationException
+     * @throws IOException
+     */
     private static boolean clientOp(MessageInput in, MessageOutput out,
                                     Scanner scn)
             throws ValidationException, IOException {
@@ -168,10 +195,13 @@ public class G8RClient {
             System.err.println(ve.getReason());
             return false;
         }
-
         return true;
     }
 
+    /**
+     * prints the message in a message
+     * @param message response G8R message
+     */
     private static void printResponse(G8RMessage message) {
         G8RResponse res = (G8RResponse)message;
 

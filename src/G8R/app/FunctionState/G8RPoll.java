@@ -71,6 +71,10 @@ public enum G8RPoll implements G8RFunction {
 
     private String name;
 
+    /**
+     * constructs a new G8R poll
+     * @param str name of enum
+     */
     G8RPoll(String str) {
         name = str;
     }
@@ -178,10 +182,20 @@ public enum G8RPoll implements G8RFunction {
         return NULL;
     }
 
+    /**
+     * a string builder function
+     * @param cookies the cookie list used to form the string
+     * @return food mood string
+     */
     private String buildFoodMood(CookieList cookies) {
         return cookies.getValue(cookie_fName) + msgFoodMood;
     }
 
+    /**
+     * a string building function
+     * @param cookies the cookie list used to form the string
+     * @return discount string
+     */
     private String buildDiscount(CookieList cookies) {
         return msgBaseDiscount +
                 cookies.getValue(cookie_repeat) + msgStoreDiscount;

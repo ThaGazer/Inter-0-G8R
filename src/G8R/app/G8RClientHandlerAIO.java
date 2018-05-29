@@ -126,12 +126,18 @@ public class G8RClientHandlerAIO
     /**
      * reads input from a client
      * @param buff buffer to read into
+     * @param reader read handler
      */
     private void readFrom(ByteBuffer buff, readHandler reader) {
         client.read(buff, CLIENTTIMEOUT, TimeUnit.MILLISECONDS,
                 buff, reader);
     }
 
+    /**
+     * writes output to a client
+     * @param buffer buffer to write into
+     * @param writer write handler
+     */
     private void writeTo(byte[] buffer, writeHandler writer) {
         ByteBuffer buff = ByteBuffer.wrap(buffer);
         client.write(buff, buff, writer);

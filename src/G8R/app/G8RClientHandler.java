@@ -101,6 +101,10 @@ public class G8RClientHandler implements Runnable {
         }
     }
 
+    /**
+     * increments app use count
+     * @param funct function to increment
+     */
     private void incrementApp(Enum funct) {
         for (ApplicationEntry ae : appList) {
             if(ae.getApplicationName().equals(((G8RFunction)funct).getName())) {

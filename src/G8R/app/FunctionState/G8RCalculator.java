@@ -112,22 +112,46 @@ public enum G8RCalculator implements G8RFunction {
 
     private String name;
 
+    /**
+     * enum contructor
+     * @param str name of enum
+     */
     G8RCalculator(String str) {
         name = str;
     }
 
+    /**
+     * the first enum in the function
+     * @return the first enum
+     */
     public static G8RCalculator first() {
         return MATH;
     }
 
+    /**
+     * the last enum in the function set
+     * @return the last enum
+     */
     public G8RCalculator last() {
         return NULL;
     }
 
+    /**
+     * name of enum
+     * @return name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * handles the math state
+     * @param mess G8R message
+     * @param out output sink
+     * @return next state
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     protected G8RCalculator state_Math(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         mess.getCookieList().add(cookie_Sum, "0");
@@ -138,6 +162,14 @@ public enum G8RCalculator implements G8RFunction {
         return FUNCT;
     }
 
+    /**
+     * handles function state
+     * @param mess G8R message
+     * @param out output sink
+     * @return next state
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     protected G8RCalculator state_Funct(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         G8RRequest req = (G8RRequest)mess;
@@ -177,6 +209,14 @@ public enum G8RCalculator implements G8RFunction {
         return state;
     }
 
+    /**
+     * handles add state
+     * @param mess G8R message
+     * @param out output sink
+     * @return next state
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     protected G8RCalculator state_Add(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         G8RRequest req = (G8RRequest)mess;
@@ -208,6 +248,14 @@ public enum G8RCalculator implements G8RFunction {
         return FUNCT;
     }
 
+    /**
+     * handles subtraction state
+     * @param mess G8R message
+     * @param out output sink
+     * @return next state
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     protected G8RCalculator state_Subtract(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         G8RRequest req = (G8RRequest)mess;
@@ -239,6 +287,14 @@ public enum G8RCalculator implements G8RFunction {
         return FUNCT;
     }
 
+    /**
+     * handles multiply state
+     * @param mess G8R message
+     * @param out output sink
+     * @return next state
+     * @throws ValidationException if G8R error
+     * @throws IOException if I/O problem
+     */
     protected G8RCalculator state_Multiply(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {
         G8RRequest req = (G8RRequest)mess;
@@ -271,12 +327,12 @@ public enum G8RCalculator implements G8RFunction {
     }
 
     /**
-     *
-     * @param mess
-     * @param out
-     * @return
-     * @throws ValidationException
-     * @throws IOException
+     * handles the exit state
+     * @param mess G8R message
+     * @param out ouput sink
+     * @return the next state
+     * @throws ValidationException if could not build message
+     * @throws IOException if I/O problem
      */
     protected G8RCalculator state_Exit(G8RMessage mess, MessageOutput out)
             throws ValidationException, IOException {

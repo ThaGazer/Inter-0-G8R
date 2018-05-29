@@ -55,15 +55,24 @@ public class ValidationException extends Exception implements Serializable {
         token = Objects.requireNonNull(tok, errEmptyTok);
     }
 
+    /**
+     * reason for exception being called
+     * @return string representation of the message
+     */
     public String getReason() {
         return getMessage() + ": " + getToken();
     }
 
+    @Override
     public void printStackTrace() {
         System.err.println(getToken());
         super.printStackTrace();
     }
 
+    /**
+     * basically the same as printStackTrace with an extra print statement
+     * @param str message to add to the trace
+     */
     public void printStackTrace(String str) {
         System.err.println(str + ": " + getToken());
         super.printStackTrace();

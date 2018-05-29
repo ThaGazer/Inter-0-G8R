@@ -137,6 +137,10 @@ public class G8RServerAIO {
         appList.addAll(G8RFunctionFactory.values());
     }
 
+    /**
+     * initializes server options
+     * @param serv the server to add options to
+     */
     private static void setup_sever(AsynchronousServerSocketChannel serv) {
         try {
             serv.setOption(StandardSocketOptions.SO_REUSEADDR, true);
@@ -215,6 +219,9 @@ public class G8RServerAIO {
 
     }
 
+    /**
+     * a class to pass variables between completion handlers
+     */
     public static class Attachment {
         long lassAccess;
         AsynchronousServerSocketChannel server;
