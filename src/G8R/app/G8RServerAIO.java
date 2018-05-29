@@ -20,9 +20,11 @@ import G8R.serialization.*;
 import N4M.app.N4MClientHandler;
 import N4M.serialization.ApplicationEntry;
 import N4M.serialization.N4MException;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -40,13 +42,18 @@ public class G8RServerAIO {
 
     //private static final String LOGGERCONFIG = "./logs/.properties";
     private static final String LOGNAME = G8RServer.class.getName();
-    private static final String G8RLOGFILE = "./logs/connections.log";
-    private static final String N4MLOGFILE = "./logs/n4m.log";
+    private static final String LOGDIR = "logs";
+    private static final String G8RLOGFILE = LOGDIR + "/onnections.log";
+    private static final String N4MLOGFILE = LOGDIR + "/n4m.log";
 
     private static final String errParams =
             "Usage: <server port>";
     private static final String errServerCrash = "Server crashed";
     private static final String errThread = "could not close thread";
+    private static final String errServerSetup = "error setting up server";
+    private static final String errLogger = "could not create logger";
+    private static final String errAppList = "could not create " +
+            "the application list";
 
     private static final String msgServerStart = "server started on port: ";
     private static final String msgServerEnd = "server closed";
@@ -62,9 +69,8 @@ public class G8RServerAIO {
     /**
      * sends and receives messages from multiple clients
      * @param argv arguments to passed to server
-     * @throws IOException if I/O problem
      */
-    public static void main(String[] argv) throws IOException, N4MException {
+    public static void main(String[] argv) {
         if(argv.length != 1) {
             throw new IllegalArgumentException(errParams);
         }
@@ -72,8 +78,19 @@ public class G8RServerAIO {
         servPort = Integer.parseInt(argv[0]);
 
         //initializes logger
-        setup_logger();
-        setup_applicationList();
+        try {
+            setup_logger();
+        } catch(IOException ioe) {
+            logger.severe(errLogger);
+            System.exit(-1);
+        }
+
+        try {
+            setup_applicationList();
+        } catch(N4MException e) {
+            logger.severe(errAppList);
+            System.exit(-1);
+        }
 
         //client handlers
         handle_G8R();
@@ -98,6 +115,11 @@ public class G8RServerAIO {
 
         /*future implementation maybe
         manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
+
+        //creates a log files
+        new File(LOGDIR).mkdirs();
+        new File(G8RLOGFILE).createNewFile();
+        new File(N4MLOGFILE).createNewFile();
 
         //initializes the logger
         logger = Logger.getLogger(LOGNAME);
@@ -131,6 +153,15 @@ public class G8RServerAIO {
         appList.addAll(G8RFunctionFactory.values());
     }
 
+    private static void setup_sever(AsynchronousServerSocketChannel serv) {
+        try {
+            serv.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+            serv.bind(new InetSocketAddress(servPort));
+        } catch(IOException ioe) {
+            logger.severe(errServerSetup);
+        }
+    }
+
     /**
      * handles a G8R request
      */
@@ -139,17 +170,27 @@ public class G8RServerAIO {
         try (AsynchronousServerSocketChannel server =
                      AsynchronousServerSocketChannel.open()) {
 
-            server.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-            server.bind(new InetSocketAddress(servPort));
+            //server setup
+            setup_sever(server);
 
-            //while(true) {
-                server.accept(null, new G8RClientHandlerAIO());
-                lastAccess = TimeUnit.MILLISECONDS.toSeconds
-                        (new Date().getTime());
-            //}
+            while(true) {
+                Attachment a = new Attachment(0L, server);
+                server.accept(a, new G8RClientHandlerAIO());
+                System.in.read();
+            }
         } catch (IOException e) {
             System.err.println(msgG8R + errServerCrash);
             logger.severe(msgG8R + errServerCrash);
+        }
+    }
+
+    public static class Attachment {
+        long lassAccess;
+        AsynchronousServerSocketChannel server;
+
+        public Attachment(long aTime, AsynchronousServerSocketChannel aServ) {
+            lassAccess = aTime;
+            server = aServ;
         }
     }
 }

@@ -13,6 +13,7 @@ import N4M.app.N4MClientHandler;
 import N4M.serialization.ApplicationEntry;
 import N4M.serialization.N4MException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -27,15 +28,19 @@ import java.util.logging.*;
 
 public class G8RServer {
 
-    //private static final String LOGGERCONFIG = "./logs/.properties";
+    //private static final String LOGGERCONFIG = "LOGDIR\\.properties";
     private static final String LOGNAME = G8RServer.class.getName();
-    private static final String G8RLOGFILE = "./logs/connections.log";
-    private static final String N4MLOGFILE = "./logs/n4m.log";
+    private static final String LOGDIR = "logs";
+    private static final String G8RLOGFILE = LOGDIR + "\\connections.log";
+    private static final String N4MLOGFILE = LOGDIR + "\\n4m.log";
 
     private static final String errParams =
             "Usage: <server port> <thread count>";
     private static final String errServerCrash = "Server crashed";
     private static final String errThread = "could not close thread";
+    private static final String errLogger = "could not create logger";
+    private static final String errAppList = "could not create " +
+            "the application list";
 
     private static final String msgServerStart = "Server started on port: ";
     private static final String msgG8RServerEnd = "G8R Server closed";
@@ -53,9 +58,8 @@ public class G8RServer {
     /**
      * sends and receives messages from multiple clients
      * @param argv arguments to passed to server
-     * @throws IOException if I/O problem
      */
-    public static void main(String[] argv) throws IOException, N4MException {
+    public static void main(String[] argv) {
         if(argv.length != 2) {
             throw new IllegalArgumentException(errParams);
         }
@@ -64,10 +68,25 @@ public class G8RServer {
         numThread = Integer.parseInt(argv[1]);
 
         //initializes logger
-        setup_logger();
-        setup_applicationList();
+        try {
+            setup_logger();
+        } catch(IOException ioe){
+            logger.severe(errLogger);
+            System.exit(-1);
+        }
 
+        //store all the applications that can be used
+        try {
+            setup_applicationList();
+        } catch(N4MException e) {
+            logger.severe(errAppList);
+            System.exit(-1);
+        }
+
+        //G8R server
         handle_G8R();
+
+        //N4M server
         handle_N4M();
 
         for(Thread t : threadList) {
@@ -99,6 +118,11 @@ public class G8RServer {
 
         /*future implementation maybe
         manager.readConfiguration(new FileInputStream(LOGGERCONFIG));*/
+
+        //creates a log files
+        new File(LOGDIR).mkdirs();
+        new File(G8RLOGFILE).createNewFile();
+        new File(N4MLOGFILE).createNewFile();
 
         //initializes the logger
         logger = Logger.getLogger(LOGNAME);

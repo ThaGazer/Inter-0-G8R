@@ -8,6 +8,8 @@
 package G8R.app.test;
 
 import G8R.serialization.*;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;

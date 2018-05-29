@@ -41,15 +41,19 @@ public class G8RTestClient {
     private static void connectToServer(InetAddress addr, int port) {
         try(Socket soc = new Socket(addr, port)) {
             if (!soc.isClosed()) {
-                initFunct(new MessageOutput(soc.getOutputStream()), function);
+                MessageOutput out = new MessageOutput(soc.getOutputStream());
+                MessageInput in = new MessageInput(soc.getInputStream());
 
-                G8RMessage message = G8RMessage.decode(new MessageInput(soc.getInputStream()));
-                printResponse(message);
+                initFunct(out, function);
 
-                initFunct(new MessageOutput(soc.getOutputStream()), function);
+                Scanner scn = new Scanner(System.in);
+                String line;
+                while(!(line = scn.nextLine()).equals("q")) {
+                    G8RMessage message = G8RMessage.decode(new MessageInput(soc.getInputStream()));
+                    printResponse(message);
 
-                message = G8RMessage.decode(new MessageInput(soc.getInputStream()));
-                printResponse(message);
+                    out.write(line);
+                }
             }
 
         } catch (Exception e) {
